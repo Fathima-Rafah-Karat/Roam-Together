@@ -386,29 +386,29 @@ export default function TripDetails() {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const [participantCount, setParticipantCount] = useState(0);
-    const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
 
-// Fetch participant count when component loads or when participants change
-useEffect(() => {
-  const fetchCount = async () => {
-    try {
-      if (!trip?._id) return;
+  // Fetch participant count when component loads or when participants change
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        if (!trip?._id) return;
 
-      const res = await axios.get(
-        `http://localhost:5000/api/traveler/participants/${trip._id}`
-      );
+        const res = await axios.get(
+          `http://localhost:5000/api/traveler/participants/${trip._id}`
+        );
 
-      if (res.data.success) {
-        setParticipantCount(res.data.count);
+        if (res.data.success) {
+          setParticipantCount(res.data.count);
+        }
+      } catch (err) {
+        console.error("Error fetching participant count:", err);
       }
-    } catch (err) {
-      console.error("Error fetching participant count:", err);
-    }
-  };
+    };
 
-  fetchCount();
-}, [trip]);
+    fetchCount();
+  }, [trip]);
 
   // Fetch trip details
   useEffect(() => {
@@ -467,9 +467,9 @@ useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightboxOpen, trip, lightboxIndex]);
 
- const handleChat = (phone) => {
-  window.open(`https://wa.me/${phone}`, "_blank");
-};
+  const handleChat = (phone) => {
+    window.open(`https://wa.me/${phone}`, "_blank");
+  };
 
   const toggleDay = (day) => {
     setOpenDays((prev) => ({ ...prev, [day]: !prev[day] }));
@@ -477,25 +477,25 @@ useEffect(() => {
 
 
 
-useEffect(() => {
-  if (participantsOpen && trip?._id) {
-    fetchParticipants();
-  }
-}, [participantsOpen, trip?._id]);
-
-const fetchParticipants = async () => {
-  try {
-    const res = await axios.get(
-      `http://localhost:5000/api/traveler/participants/${trip._id}`
-    );
-
-    if (res.data.success) {
-      setParticipants(res.data.data); // Store all users
+  useEffect(() => {
+    if (participantsOpen && trip?._id) {
+      fetchParticipants();
     }
-  } catch (error) {
-    console.error("Error loading participants:", error);
-  }
-};
+  }, [participantsOpen, trip?._id]);
+
+  const fetchParticipants = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/traveler/participants/${trip._id}`
+      );
+
+      if (res.data.success) {
+        setParticipants(res.data.data); // Store all users
+      }
+    } catch (error) {
+      console.error("Error loading participants:", error);
+    }
+  };
 
 
 
@@ -625,71 +625,71 @@ const fetchParticipants = async () => {
               })}
             </div>
 
-                  {/* ---------------- Lightbox With ONE-BY-ONE Scroll / Swipe ---------------- */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent
-          className="
+            {/* ---------------- Lightbox With ONE-BY-ONE Scroll / Swipe ---------------- */}
+            <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+              <DialogContent
+                className="
       fixed inset-0 bg-black/70 backdrop-blur-sm p-0 
       max-w-6xl h-full flex items-center justify-center 
       border-none rounded-none shadow-none
     "
-        >
-          <div
-            className="relative w-full h-full overflow-hidden flex items-center justify-center"
+              >
+                <div
+                  className="relative w-full h-full overflow-hidden flex items-center justify-center"
 
-            // === ONE IMAGE PER WHEEL SCROLL ===
-            onWheel={(e) => {
-              if (window.scrollLock) return; // prevent rapid scrolling
-              window.scrollLock = true;
+                  // === ONE IMAGE PER WHEEL SCROLL ===
+                  onWheel={(e) => {
+                    if (window.scrollLock) return; // prevent rapid scrolling
+                    window.scrollLock = true;
 
-              if (e.deltaY > 0) nextLightbox();
-              else prevLightbox();
+                    if (e.deltaY > 0) nextLightbox();
+                    else prevLightbox();
 
-              setTimeout(() => (window.scrollLock = false), 400); // delay to stop multi-scroll
-            }}
+                    setTimeout(() => (window.scrollLock = false), 400); // delay to stop multi-scroll
+                  }}
 
-            // === Touch Swipe ===
-            onTouchStart={(e) => {
-              window.touchStartX = e.touches[0].clientX;
-            }}
-            onTouchEnd={(e) => {
-              const touchEndX = e.changedTouches[0].clientX;
-              const diff = window.touchStartX - touchEndX;
+                  // === Touch Swipe ===
+                  onTouchStart={(e) => {
+                    window.touchStartX = e.touches[0].clientX;
+                  }}
+                  onTouchEnd={(e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const diff = window.touchStartX - touchEndX;
 
-              if (diff > 50) nextLightbox();      // swipe left
-              if (diff < -50) prevLightbox();     // swipe right
-            }}
-          >
-            {/* IMAGE */}
-            {trip?.tripPhoto?.length ? (
-              <img
-                src={`http://localhost:5000/${trip.tripPhoto[lightboxIndex].replace(/^\\+/, "")}`}
-                alt={`lightbox-${lightboxIndex}`}
-                className="max-h-full max-w-full object-contain select-none"
-                draggable="false"
-              />
-            ) : (
-              <div className="text-white">No images available</div>
-            )}
+                    if (diff > 50) nextLightbox();      // swipe left
+                    if (diff < -50) prevLightbox();     // swipe right
+                  }}
+                >
+                  {/* IMAGE */}
+                  {trip?.tripPhoto?.length ? (
+                    <img
+                      src={`http://localhost:5000/${trip.tripPhoto[lightboxIndex].replace(/^\\+/, "")}`}
+                      alt={`lightbox-${lightboxIndex}`}
+                      className="max-h-full max-w-full object-contain select-none"
+                      draggable="false"
+                    />
+                  ) : (
+                    <div className="text-white">No images available</div>
+                  )}
 
-            {/* CLOSE BUTTON */}
-            <Button
-              variant="ghost"
-              className="absolute top-4 right-4 p-2 bg-white/20 rounded-full"
-              onClick={() => setLightboxOpen(false)}
-            >
-              <XIcon className="h-5 w-5 text-white" />
-            </Button>
+                  {/* CLOSE BUTTON */}
+                  <Button
+                    variant="ghost"
+                    className="absolute top-4 right-4 p-2 bg-white/20 rounded-full"
+                    onClick={() => setLightboxOpen(false)}
+                  >
+                    <XIcon className="h-5 w-5 text-white" />
+                  </Button>
 
-            {/* COUNTER */}
-            {trip?.tripPhoto?.length > 0 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/40 px-3 py-1 rounded-md">
-                {lightboxIndex + 1} / {trip.tripPhoto.length}
-              </div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                  {/* COUNTER */}
+                  {trip?.tripPhoto?.length > 0 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/40 px-3 py-1 rounded-md">
+                      {lightboxIndex + 1} / {trip.tripPhoto.length}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
 
 
             {/* Trip Details */}
@@ -949,49 +949,59 @@ const fetchParticipants = async () => {
                   </DialogHeader>
 
                   <form
-  className="space-y-4 mt-4"
-  onSubmit={async (e) => {
-    e.preventDefault();
+                    className="space-y-4 mt-4"
+                    onSubmit={async (e) => {
+                      e.preventDefault();
 
-    // Prevent registration if max participants reached
-    if (participantCount >= trip.participants) {
-      toast.error("Registration full. No more seats available.");
-      return;
-    }
+                      // Prevent registration if max participants reached
+                      if (participantCount >= trip.participants) {
+                        toast.error("Registration full. No more seats available.");
+                        return;
+                      }
 
-    const formData = new FormData();
-    formData.append("name", e.target.name.value);
-    formData.append("email", e.target.email.value);
-    formData.append("phone", e.target.phone.value);
-    formData.append("tripId", trip._id);
+                      const formData = new FormData();
+                      formData.append("name", e.target.name.value);
+                      formData.append("email", e.target.email.value);
+                      formData.append("phone", e.target.phone.value);
+                      formData.append("tripId", trip._id);
 
-    if (e.target.photo.files[0]) {
-      formData.append("photo", e.target.photo.files[0]);
-    }
-    if (e.target.aadharcard.files[0]) {
-      formData.append("aadharcard", e.target.aadharcard.files[0]);
-    }
+                      if (e.target.photo.files[0]) {
+                        formData.append("photo", e.target.photo.files[0]);
+                      }
+                      if (e.target.aadharcard.files[0]) {
+                        formData.append("aadharcard", e.target.aadharcard.files[0]);
+                      }
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/traveler/register",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+                      try {
+                        // Get JWT token from localStorage (or wherever you store it)
+                        const token = localStorage.getItem("token");
+                        if (!token) {
+                          toast.error("You must be logged in to register.");
+                          return;
+                        }
 
-      toast.success("Registration Successful!");
-      setRegisterOpen(false);
+                        const res = await axios.post(
+                          "http://localhost:5000/api/traveler/register",
+                          formData,
+                          {
+                            headers: {
+                              "Content-Type": "multipart/form-data",
+                              Authorization: `Bearer ${token}`, // <-- Send token here
+                            },
+                          }
+                        );
 
-      // Update participant count after successful registration
-      setParticipantCount(prev => prev + 1);
+                        toast.success("Registration Successful!");
+                        setRegisterOpen(false);
 
-    } catch (err) {
-      console.error("Registration error:", err);
-      toast.error(err.response?.data?.error || "Server error");
-    }
-  }}
->
-
+                        // Update participant count after successful registration
+                        setParticipantCount((prev) => prev + 1);
+                      } catch (err) {
+                        console.error("Registration error:", err);
+                        toast.error(err.response?.data?.error || "Server error");
+                      }
+                    }}
+                  >
                     {/* Full Name */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Full Name</label>
@@ -1037,7 +1047,6 @@ const fetchParticipants = async () => {
                         accept="image/*"
                         required
                         className="w-full p-2 border rounded-md border-gray-300 focus:outline-none focus:border-blue-500 hover:border-blue-500 transition"
-                        
                       />
                     </div>
 
@@ -1055,57 +1064,61 @@ const fetchParticipants = async () => {
 
                     {/* Buttons */}
                     <div className="flex justify-end gap-2 pt-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setRegisterOpen(false)}
-                      >
+                      <Button type="button" variant="outline" onClick={() => setRegisterOpen(false)}>
                         Cancel
                       </Button>
                       <Button type="submit">Submit</Button>
                     </div>
                   </form>
+
                 </DialogContent>
               </Dialog>
 
 
-<Dialog open={participantsOpen} onOpenChange={setParticipantsOpen}>
-  <DialogTrigger asChild>
-    <Button variant="outline" className="w-full gap-2">
-      <Users className="h-4 w-4" />
-      View Participants ({})
-    </Button>
-  </DialogTrigger>
+              <Dialog open={participantsOpen} onOpenChange={setParticipantsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full gap-2">
+                    <Users className="h-4 w-4" />
+                    View Participants ({participantCount})
+                  </Button>
+                </DialogTrigger>
 
-  <DialogContent className="sm:max-w-[500px]">
-    <DialogHeader>
-      <DialogTitle>Trip Participants</DialogTitle>
-      <DialogDescription>
-        Meet the travelers joining this adventure
-      </DialogDescription>
-    </DialogHeader>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Trip Participants</DialogTitle>
+                  </DialogHeader>
 
-<div className="grid gap-3 py-4 max-h-[400px] overflow-y-auto">
-  {participants.map((participant) => (
-    <div
-      key={participant._id}
-      className="flex items-center gap-3 p-3 rounded-lg border"
-    >
-      <Avatar>
-        <AvatarFallback className="bg-gray-200 text-black font-bold">
-          {participant.name?.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+                  <div className="space-y-3 max-h-[300px] overflow-auto pr-2">
+                    {participants.length === 0 ? (
+                      <p className="text-center text-muted-foreground">No participants yet.</p>
+                    ) : (
+                      participants.map((p) => (
+                        <div
+                          key={p._id}
+                          className="flex items-center gap-3 p-2 border rounded-md"
+                        >
+                          <Avatar>
+                            <AvatarImage
+                              src={`http://localhost:5000/${p.photo?.replace(/^\\+/, "")}`}
+                            />
+                            <AvatarFallback>{p.name?.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium capitalize">{p.name}</p>
+                            <p className="text-sm text-muted-foreground">{p.email}</p>
+                            <button
+                              onClick={() => handleChat(p.phone)}
+                              className="text-green-600 text-sm underline"
+                            >
 
-      <div className="flex-1">
-        <p className="font-medium">{participant.name}</p>
-      </div>
-    </div>
-  ))}
-</div>
-
-  </DialogContent>
-</Dialog>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
 
 
               <Button
