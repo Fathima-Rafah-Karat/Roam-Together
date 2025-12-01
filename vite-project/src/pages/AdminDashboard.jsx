@@ -360,7 +360,6 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import {
   BarChart,
   Bar,
@@ -461,7 +460,7 @@ const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+
 
       <div className="container mx-auto px-4 pt-24 pb-12">
         <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>

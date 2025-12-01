@@ -9,7 +9,6 @@ import DiscoverTrips from "./pages/Dashboard";
 import TripDetails from "./pages/TripDetails";
 import TripChat from "./pages/TripChat";
 import OrganizerDashboard from "./pages/OrganizerDashboard";
-import OrganizerVerification from "./pages/OrganizerVerification";
 import AdminVerifications from "./pages/AdminVerifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import TravelDiary from "./pages/TravelDiary";
@@ -45,13 +44,11 @@ const App = () => (
 
          <Route path="/organizer" element={<LayoutOrganizer />}>
             <Route path="verify" element={<OrganizerDashboard />} />
-             <Route path="submitverfiy" element={<OrganizerVerification />} />
 
           </Route>
           {/* <Route path="/trip/:id" element={<TripDetails />} /> */}
           <Route path="/trip/:id/chat" element={<TripChat />} />
           {/* <Route path="/organizer" element={<OrganizerDashboard />} /> */}
-          <Route path="/organizer/verify" element={<OrganizerVerification />} />
           <Route path="/admin/verifications" element={<AdminVerifications />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
 
