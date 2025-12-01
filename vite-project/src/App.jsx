@@ -20,7 +20,7 @@ import Notifications from "./pages/notification";
 import MyTrips from "./pages/mytrip";
 import MyTripDetails from "./pages/mytripdetails"; 
 import { Layout } from "./components/Layout";
-
+import {LayoutOrganizer} from "./components/LayoutOrganizer";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -41,11 +41,16 @@ const App = () => (
             <Route path="mytrip" element={<MyTrips />} />
              <Route path="mytrip/:id" element={<MyTripDetails />} />
             <Route path="trip/:id" element={<TripDetails />} />
+          </Route>
+
+         <Route path="/organizer" element={<LayoutOrganizer />}>
+            <Route path="verify" element={<OrganizerDashboard />} />
+             <Route path="submitverfiy" element={<OrganizerVerification />} />
 
           </Route>
           {/* <Route path="/trip/:id" element={<TripDetails />} /> */}
           <Route path="/trip/:id/chat" element={<TripChat />} />
-          <Route path="/organizer" element={<OrganizerDashboard />} />
+          {/* <Route path="/organizer" element={<OrganizerDashboard />} /> */}
           <Route path="/organizer/verify" element={<OrganizerVerification />} />
           <Route path="/admin/verifications" element={<AdminVerifications />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />

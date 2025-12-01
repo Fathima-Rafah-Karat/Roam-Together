@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Upload, CheckCircle, XCircle, Clock } from "lucide-react";
-import Navbar from "@/components/Navbar";
+// import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
 
 const OrganizerVerification = () => {
@@ -158,7 +158,7 @@ const OrganizerVerification = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
         <div className="mb-8">

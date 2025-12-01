@@ -418,15 +418,21 @@
 
 
 
+
+
+
+
+
+// this correct
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { MapPin, Users, BarChart3, Plus, Calendar, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+// import { Label } from "@/components/ui/label";
+// import { Input } from "@/components/ui/input";
+// import { Textarea } from "@/components/ui/textarea";
+// import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 
 export default function OrganizerDashboard() {
@@ -459,10 +465,10 @@ export default function OrganizerDashboard() {
     
 
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Organizer Dashboard</h1>
           <p className="text-gray-500">Manage your trips and track engagement</p>
-        </div>
+        </div> */}
 
         {/* Verification Alert */}
         {!isVerified && (
@@ -494,7 +500,7 @@ export default function OrganizerDashboard() {
           </Card>
         )}
 
-        {/* Stats */}
+        {/* Stats
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardContent className="pt-6 flex justify-between items-center">
@@ -525,9 +531,9 @@ export default function OrganizerDashboard() {
               <Users className="h-8 w-8 text-accent" />
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
-        {/* Create Trip Button */}
+        {/* Create Trip Button
         <div className="mb-6">
           <Button size="lg" disabled={!isVerified} onClick={() => setShowModal(true)}>
             <Plus className="h-5 w-5 mr-2" /> Create New Trip
@@ -596,9 +602,9 @@ export default function OrganizerDashboard() {
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
-        {/* Trips List */}
+        {/* Trips List
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Your Trips</h2>
 
@@ -645,7 +651,7 @@ export default function OrganizerDashboard() {
               </Card>
             ))
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

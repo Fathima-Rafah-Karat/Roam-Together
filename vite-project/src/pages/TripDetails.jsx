@@ -873,45 +873,39 @@ export default function TripDetails() {
               )}
               {activeTab === "info" && (
                 <div>
+                  <h3 className="text-xl font-semibold mb-4">Trip Information</h3>
 
-                  {/* About Trip */}
-                  <div className="mb-6">
-                    <h3 className="text-xl font-semibold mb-4"> Trip Information</h3>
-                  </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
 
-                  {/* Two Column Inclusions & Exclusions */}
-                  <div>
+  {/* Inclusions */}
+  <div>
+    <h3 className="text-lg font-semibold mb-2">Inclusions</h3>
+    <ul className="list-disc list-inside space-y-1">
+      {trip.inclusionspoint?.map((item, index) => (
+        <li key={index} className="capitalize">
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
 
-                    <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-                      <thead className="bg-gray-100">
-                        <tr>
-                          <th className="p-3 text-left font-medium border-b">Inclusions</th>
-                          <th className="p-3 text-left font-medium border-b">Exclusions</th>
-                        </tr>
-                      </thead>
+  {/* Exclusions */}
+  <div>
+    <h3 className="text-lg font-semibold mb-2">Exclusions</h3>
+    <ul className="list-disc list-inside space-y-1">
+      {trip.exclusionspoint?.map((item, index) => (
+        <li key={index} className="capitalize">
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
 
-                      <tbody>
-                        {/* Make rows equal by max length */}
-                        {Array.from({
-                          length: Math.max(
-                            trip.inclusionspoint?.length || 0,
-                            trip.exclusionspoint?.length || 0
-                          ),
-                        }).map((_, index) => (
-                          <tr key={index} className="border-b">
-                            <td className="p-3 capitalize">
-                              {trip.inclusionspoint?.[index] || ""}
-                            </td>
-                            <td className="p-3 capitalize">
-                              {trip.exclusionspoint?.[index] || ""}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+</div>
                 </div>
               )}
+
+
             </CardContent>
 
           </Card>
@@ -928,12 +922,19 @@ export default function TripDetails() {
 
             <CardContent className="space-y-4">
               <div className="p-4 bg-primary/10 rounded-lg">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-3xl font-bold">{trip.price}</span>
-                  <span className="text-muted-foreground">per person</span>
-                </div>
-
-              </div>
+  <div className="flex items-baseline gap-2 mb-1">
+    <span className="text-3xl font-bold">{trip.price}</span>
+    <span className="text-muted-foreground">per person</span>
+  </div>
+  <p className="text-m font-semibold text-gray-600 mt-2">
+    {participantCount} / {trip.participants} spots filled
+  </p>
+  <p className="text-sm text-red-600 mt-1">
+    {participantCount >= trip.participants
+      ? "Trip is full"
+      : `${trip.participants - participantCount} spots remaining`}
+  </p>
+</div>
 
               <Button className="w-full" size="lg" onClick={() => setRegisterOpen(true)}>
                 Register Now
@@ -1075,50 +1076,7 @@ export default function TripDetails() {
               </Dialog>
 
 
-              <Dialog open={participantsOpen} onOpenChange={setParticipantsOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="w-full gap-2">
-                    <Users className="h-4 w-4" />
-                    View Participants ({participantCount})
-                  </Button>
-                </DialogTrigger>
-
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>Trip Participants</DialogTitle>
-                  </DialogHeader>
-
-                  <div className="space-y-3 max-h-[300px] overflow-auto pr-2">
-                    {participants.length === 0 ? (
-                      <p className="text-center text-muted-foreground">No participants yet.</p>
-                    ) : (
-                      participants.map((p) => (
-                        <div
-                          key={p._id}
-                          className="flex items-center gap-3 p-2 border rounded-md"
-                        >
-                          <Avatar>
-                            <AvatarImage
-                              src={`http://localhost:5000/${p.photo?.replace(/^\\+/, "")}`}
-                            />
-                            <AvatarFallback>{p.name?.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium capitalize">{p.name}</p>
-                            <p className="text-sm text-muted-foreground">{p.email}</p>
-                            <button
-                              onClick={() => handleChat(p.phone)}
-                              className="text-green-600 text-sm underline"
-                            >
-
-                            </button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
+             
 
 
               <Button

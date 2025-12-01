@@ -14,15 +14,7 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const emergencyNumbers = {
-  USA: "911",
-  Canada: "911",
-  UK: "999",
-  EU: "112",
-  Australia: "000",
-  India: "112",
-  Japan: "110",
-};
+
 
 const Emergency = () => {
   const navigate = useNavigate();
@@ -192,20 +184,7 @@ const Emergency = () => {
           </CardContent>
         </Card>
 
-        {/* Global Numbers */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Global Emergency Numbers</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(emergencyNumbers).map(([country, number]) => (
-              <div key={country} className="p-4 rounded-lg border">
-                <p className="font-medium mb-1">{country}</p>
-                <span className="text-primary text-lg font-bold">{number}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+
       </div>
     </div>
   );

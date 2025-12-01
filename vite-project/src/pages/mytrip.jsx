@@ -398,7 +398,7 @@ export default function MyTrips() {
           <ArrowLeft className="h-4 w-4" /> 
         </Button>
 
-        <h1 className="text-3xl font-bold">Reviews for {selectedTrip.title}</h1>
+        <h1 className="text-3xl text-blue-300 font-bold">Reviews for {selectedTrip.title}</h1>
 
         <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
           <DialogTrigger asChild>
@@ -447,25 +447,28 @@ export default function MyTrips() {
         {tripReviews.length === 0 ? (
           <p>No reviews yet.</p>
         ) : (
-          tripReviews.map((rev) => (
-            <Card key={rev._id} className="mb-2 p-2">
-              <strong>{rev.TravelerId?.name || "Anonymous"}</strong>
-              <p className="flex items-center gap-1 mb-1">
-                rated:
-                <span className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`h-4 w-4 ${
-                        star <= rev.rating ? "text-yellow-400" : "text-gray-300"
-                      }`}
-                    />
-                  ))}
-                </span>
-              </p>
-              <p>{rev.review}</p>
-            </Card>
-          ))
+         tripReviews.map((rev) => (
+  <Card key={rev._id} className="mb-2 p-3">
+    <div className="flex justify-between items-center mb-1">
+      <strong>{rev.TravelerId?.name || "Anonymous"}</strong>
+
+      {/* Rating on the right side */}
+      <span className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-4 w-4 ${
+              star <= rev.rating ? "text-yellow-400" : "text-gray-300"
+            }`}
+          />
+        ))}
+      </span>
+    </div>
+
+    <p className="text-sm text-muted-foreground">{rev.review}</p>
+  </Card>
+))
+
         )}
       </div>
     );

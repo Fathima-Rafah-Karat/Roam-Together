@@ -257,8 +257,6 @@
 
 
 
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -278,16 +276,21 @@ import { toast } from "react-hot-toast";
 
 export default function DiscoverTrips() {
   const navigate = useNavigate();
+
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filteredTrips, setFilteredTrips] = useState([]);
+  const [registeredTrips, setRegisteredTrips] = useState([]); // only trip IDs
 
+  // Fetch all trips
   const fetchTrips = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/traveler/trips");
-      setTrips(res.data.data || []);
-      setFilteredTrips(res.data.data || []);
+
+      const tripsData = res.data.data || [];
+      setTrips(tripsData);
+      setFilteredTrips(tripsData);
     } catch (err) {
       console.error(err);
       toast.error("Failed to load trips");
@@ -296,24 +299,48 @@ export default function DiscoverTrips() {
     }
   };
 
+  // Fetch trips user has registered for
+  const fetchUserRegistrations = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const res = await axios.get(
+        "http://localhost:5000/api/traveler/registered",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.success) {
+        // backend returns full trip objects → convert to only IDs
+        const ids = res.data.data.map((trip) => trip._id);
+        setRegisteredTrips(ids);
+      }
+    } catch (err) {
+      console.error("Error fetching registrations:", err);
+    }
+  };
+
   useEffect(() => {
     fetchTrips();
+    fetchUserRegistrations();
   }, []);
 
-  const handleSearch = async () => {
-    if (!search) {
-      setFilteredTrips(trips); 
+  // Search handler
+  const handleSearch = (query) => {
+    setSearch(query);
+
+    if (!query) {
+      setFilteredTrips(trips);
       return;
     }
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/traveler/search?location=${search}`
-      );
-      setFilteredTrips(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-      toast.error("Search failed");
-    }
+
+    const filtered = trips.filter((trip) =>
+      trip.location.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setFilteredTrips(filtered);
   };
 
   return (
@@ -327,43 +354,41 @@ export default function DiscoverTrips() {
         </p>
       </div>
 
- <div className="relative mb-6">
-  <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-    <Search className="h-4 w-4" />
-  </span>
-  <input
-    type="text"
-    placeholder="Search by location..."
-    value={search}
-    onChange={(e) => {
-      setSearch(e.target.value);
-     
-      const filtered = trips.filter((trip) =>
-        trip.location.toLowerCase().includes(e.target.value.toLowerCase())
-      );
-      setFilteredTrips(filtered);
-    }}
-    className="w-full pl-10 p-2 border rounded-md focus:outline-none focus:border-blue-500"
-  />
-</div>
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <Search className="h-4 w-4" />
+        </span>
+        <input
+          type="text"
+          placeholder="Search by location..."
+          value={search}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="w-full pl-10 p-2 border rounded-md focus:outline-none focus:border-blue-500"
+        />
+      </div>
 
+      {/* Loading */}
       {loading && (
         <p className="text-center text-muted-foreground text-xl py-10">
           Loading trips...
         </p>
       )}
 
+      {/* No trips */}
       {!loading && filteredTrips.length === 0 && (
-        <Card className="p-12 text-center text-lg">
-          No trips available
-        </Card>
+        <Card className="p-12 text-center text-lg">No trips available</Card>
       )}
+
+      {/* Trip Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredTrips.map((trip) => {
           const imageUrl =
             trip.tripPhoto && trip.tripPhoto.length > 0
               ? `http://localhost:5000/${trip.tripPhoto[0].replace(/^\/+/, "")}`
               : "/fallback.jpg";
+
+          const isRegistered = registeredTrips.includes(trip._id);
 
           return (
             <Card
@@ -378,21 +403,34 @@ export default function DiscoverTrips() {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/20 to-black/10" />
 
+              {/* Registered Badge */}
+              <div className="absolute top-3 right-3 z-20">
+                {isRegistered && (
+                  <Badge className="bg-green-600 text-white">Registered</Badge>
+                )}
+              </div>
+
               <div className="relative z-10 h-full flex flex-col justify-end p-6 text-white">
-                <div className="flex gap-2 flex-wrap mb-2">
-                  {trip.tags?.map((tag) => (
-                    <Badge
-                      key={tag}
-                      variant="secondary"
-                      className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs"
-                    >
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-                <CardTitle className="text-3xl font-bold mb-4">{trip.title}</CardTitle>
-                <CardDescription className="flex items-center gap-2 text-black/80 ">
-                  <div className="flex items-center rounded-lg px-2 gap-2 bg-white">
+                {trip.tags?.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {trip.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                <CardTitle className="text-3xl font-bold mb-4">
+                  {trip.title}
+                </CardTitle>
+
+                <CardDescription className="flex items-center gap-2">
+                  <div className="flex items-center rounded-lg px-2 gap-2 bg-white text-black">
                     <MapPin className="text-blue-400 h-4 w-4" />
                     {trip.location}
                   </div>
@@ -401,25 +439,12 @@ export default function DiscoverTrips() {
                 <div className="flex gap-10 text-sm text-white pt-2">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-5 w-5" />
-                    {trip.startDate
-                      ? new Date(trip.startDate).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : ""}{" "}
-                    -{" "}
-                    {trip.endDate
-                      ? new Date(trip.endDate).toLocaleDateString("en-GB", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : ""}
+                    {new Date(trip.startDate).toLocaleDateString("en-GB")} -{" "}
+                    {new Date(trip.endDate).toLocaleDateString("en-GB")}
                   </span>
+
                   <span className="flex items-center gap-1">
-                    <Users className="h-5 w-5" />
-                    {trip.participants}
+                    <Users className="h-5 w-5" /> {trip.participants}
                   </span>
                 </div>
 
@@ -440,3 +465,21 @@ export default function DiscoverTrips() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
