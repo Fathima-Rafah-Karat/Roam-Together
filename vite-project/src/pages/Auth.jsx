@@ -249,7 +249,6 @@
 
 
 
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -302,7 +301,7 @@ const Auth = () => {
     console.log("Redirecting user with role:", rawRole);
 
     if (role === "admin") navigate("/admin/dashboard");
-    else if (role === "organizer") navigate("/organizer");
+    else if (role === "organizer") navigate("/verification");
     else navigate("/dash/dashboard"); 
   };
 

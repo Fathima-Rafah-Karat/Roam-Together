@@ -554,36 +554,55 @@ const handleDeleteTrip = async () => {
                 </div>
               )}
 
-              {activeTab === "info" && (
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Trip Information</h3>
-                  <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="p-3 text-left font-medium border-b">Inclusions</th>
-                        <th className="p-3 text-left font-medium border-b">Exclusions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.from({
-                        length: Math.max(
-                          trip.inclusionspoint?.length || 0,
-                          trip.exclusionspoint?.length || 0
-                        ),
-                      }).map((_, index) => (
-                        <tr key={index} className="border-b">
-                          <td className="p-3 capitalize">
-                            {trip.inclusionspoint?.[index] || ""}
-                          </td>
-                          <td className="p-3 capitalize">
-                            {trip.exclusionspoint?.[index] || ""}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+             {activeTab === "info" && (
+  <div>
+    <h3 className="text-xl font-semibold mb-4">Trip Information</h3>
+
+    <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="p-3 text-left font-medium border-b">Inclusions</th>
+          <th className="p-3 text-left font-medium border-b">Exclusions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          {/* INCLUSIONS */}
+          <td className="p-3 align-top">
+            <ul className="list-disc ml-5">
+              {trip.inclusionspoint &&
+                trip.inclusionspoint
+                  .join(",") // ensure it's a single string
+                  .split(",") // split into separate points
+                  .map((item, index) => (
+                    <li key={index} className="capitalize">
+                      {item.trim()}
+                    </li>
+                  ))}
+            </ul>
+          </td>
+
+          {/* EXCLUSIONS */}
+          <td className="p-3 align-top">
+            <ul className="list-disc ml-5">
+              {trip.exclusionspoint &&
+                trip.exclusionspoint
+                  .join(",")
+                  .split(",")
+                  .map((item, index) => (
+                    <li key={index} className="capitalize">
+                      {item.trim()}
+                    </li>
+                  ))}
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)}
+
             </CardContent>
           </Card>
         </div>

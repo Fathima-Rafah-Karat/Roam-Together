@@ -422,184 +422,398 @@
 
 
 
-import React, { useState, useEffect } from "react";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { MapPin, Users, Calendar, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Upload } from "lucide-react";
-import { Toaster, toast } from "react-hot-toast";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
-export default function OrganizerDashboard() {
-  const [isVerified, setIsVerified] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
+export default function Dashboard() {
+  const navigate = useNavigate();
 
-  const token = localStorage.getItem("token"); // Must be Organizer's JWT
+  const stats = [
+    { title: "Total Trips", value: "12", icon: MapPin, change: "+2 this month", trend: "up" },
+    { title: "Active Participants", value: "148", icon: Users, change: "+23 this week", trend: "up" },
+    { title: "Upcoming Events", value: "5", icon: Calendar, change: "Next: Tomorrow", trend: "neutral" },
+    { title: "Completion Rate", value: "94%", icon: TrendingUp, change: "+3% from last month", trend: "up" },
+  ];
 
-  // Fetch verification status
-  useEffect(() => {
-    const fetchVerificationStatus = async () => {
-      if (!token) return;
-
-      try {
-        const res = await axios.get("http://localhost:5000/api/verify/view", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.data.success && res.data.data?.length > 0) {
-          const latest = res.data.data[0]; // Latest verification
-          setVerificationStatus(latest.status);
-          if (latest.status === "approved") setIsVerified(true);
-        }
-      } catch (error) {
-        console.error("Error fetching verification status:", error);
-        toast.error(error.response?.data?.message || "Failed to fetch verification status");
-      }
-    };
-
-    fetchVerificationStatus();
-  }, [token]);
-
-  // Submit verification
-  const handleSubmitVerification = async (e) => {
-    e.preventDefault();
-    setUploading(true);
-
-    if (!token) {
-      toast.error("You must be logged in to submit verification.");
-      setUploading(false);
-      return;
-    }
-
-    try {
-      const form = e.target;
-      const govtIdType = form.govtIdType.value;
-      const photoFile = form.photo.files[0];
-      const govtIdPhotoFile = form.govtIdPhoto.files[0];
-
-      if (!govtIdType || !photoFile || !govtIdPhotoFile) {
-        throw new Error("All fields are required.");
-      }
-
-      const formData = new FormData();
-      formData.append("govtIdType", govtIdType);
-      formData.append("photo", photoFile);
-      formData.append("govtIdPhoto", govtIdPhotoFile);
-
-      const response = await axios.post(
-        "http://localhost:5000/api/verify/verification",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // Must include token
-          },
-        }
-      );
-
-      toast.success(response.data.message || "Verification submitted successfully");
-      setVerificationStatus("pending");
-      setShowModal(false);
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || error.message || "Submission failed");
-    } finally {
-      setUploading(false);
-    }
-  };
+  const recentTrips = [
+    { id: 1, name: "Summer Beach Retreat", date: "Jul 15-20, 2025", participants: 24, status: "upcoming" },
+    { id: 2, name: "Mountain Hiking Adventure", date: "Aug 5-10, 2025", participants: 18, status: "planning" },
+    { id: 3, name: "City Food Tour", date: "Jun 20-22, 2025", participants: 32, status: "completed" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Toaster position="top-center" reverseOrder={false} />
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-4xl font-display font-bold text-foreground">Dashboard</h1>
+            <p className="text-muted-foreground mt-1">
+              Welcome back! Here's your trip overview.
+            </p>
+          </div>
 
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        {!isVerified && (
-          <Card className="mb-8 border-yellow-500/20 bg-yellow-500/10">
-            <CardContent className="pt-6">
-              {!verificationStatus ? (
-                <>
-                  <h3 className="font-semibold mb-2">Verification Required</h3>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Submit your documents for admin review to create trips.
-                  </p>
-                  <Button onClick={() => setShowModal(true)}>Submit Verification</Button>
-                </>
-              ) : verificationStatus === "pending" ? (
-                <>
-                  <h3 className="font-semibold mb-2">Verification Pending</h3>
-                  <p className="text-sm text-gray-500 mb-4">Your verification is under review.</p>
-                  <Button variant="outline" onClick={() => setShowModal(true)}>View Status</Button>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm text-red-600 mb-4">Verification rejected. Please resubmit.</p>
-                  <Button onClick={() => setShowModal(true)}>Resubmit Verification</Button>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {isVerified && (
-          <Card className="border-green-500/20 bg-green-500/10">
-            <CardContent className="pt-6">
-              <h3 className="font-semibold text-green-600">✅ Your account is verified!</h3>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-lg">
-            <CardHeader>
-              <CardTitle>Submit Verification Documents</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form className="space-y-6" onSubmit={handleSubmitVerification}>
-                <div className="space-y-2">
-                  <Label htmlFor="govtIdType">Government ID Type *</Label>
-                  <select
-                    id="govtIdType"
-                    name="govtIdType"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    required
-                  >
-                    <option value="">Select ID Type</option>
-                    <option value="driving license">Driving License</option>
-                    <option value="aadhar card">Aadhar Card</option>
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="govtIdPhoto">Government ID *</Label>
-                  <Input id="govtIdPhoto" name="govtIdPhoto" type="file" accept="image/*,.pdf" required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="photo">Profile Photo *</Label>
-                  <Input id="photo" name="photo" type="file" accept="image/*" required />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={uploading}>
-                  {uploading ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" /> Submit</>}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full mt-2"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
         </div>
-      )}
-    </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="shadow-soft hover:shadow-glow transition-smooth">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </CardTitle>
+                  <stat.icon className="w-4 h-4 text-accent" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-3xl font-display font-bold text-foreground">
+                    {stat.value}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Recent Trips */}
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="text-xl font-display">Recent Trips</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentTrips.map((trip) => (
+                <motion.div
+                  key={trip.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-smooth cursor-pointer"
+                  onClick={() => navigate(`/trips/${trip.id}`)}
+                >
+                  <div className="flex-1">
+                    <h3 className="font-display font-semibold text-foreground">
+                      {trip.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {trip.date}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">
+                        {trip.participants} participants
+                      </p>
+                    </div>
+
+                    <Badge
+                      variant={trip.status === "completed" ? "secondary" : "default"}
+                      className={
+                        trip.status === "upcoming"
+                          ? "bg-accent text-accent-foreground"
+                          : ""
+                      }
+                    >
+                      {trip.status}
+                    </Badge>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Button } from "@/components/ui/button";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
+// import { Upload } from "lucide-react";
+// import { Toaster, toast } from "react-hot-toast";
+// import axios from "axios";
+
+// export default function OrganizerDashboard() {
+//   const [isVerified, setIsVerified] = useState(false);
+//   const [verificationStatus, setVerificationStatus] = useState(null);
+//   const [showModal, setShowModal] = useState(false);
+//   const [uploading, setUploading] = useState(false);
+
+//   const token = localStorage.getItem("token"); // Must be Organizer's JWT
+
+//   // Fetch verification status
+//   useEffect(() => {
+//     const fetchVerificationStatus = async () => {
+//       if (!token) return;
+
+//       try {
+//         const res = await axios.get("http://localhost:5000/api/verify/view", {
+//           headers: { Authorization: `Bearer ${token}` },
+//         });
+
+//         if (res.data.success && res.data.data?.length > 0) {
+//           const latest = res.data.data[0]; // Latest verification
+//           setVerificationStatus(latest.status);
+//           if (latest.status === "approved") setIsVerified(true);
+//         }
+//       } catch (error) {
+//         console.error("Error fetching verification status:", error);
+//         toast.error(error.response?.data?.message || "Failed to fetch verification status");
+//       }
+//     };
+
+//     fetchVerificationStatus();
+//   }, [token]);
+
+//   // Submit verification
+//   const handleSubmitVerification = async (e) => {
+//     e.preventDefault();
+//     setUploading(true);
+
+//     if (!token) {
+//       toast.error("You must be logged in to submit verification.");
+//       setUploading(false);
+//       return;
+//     }
+
+//     try {
+//       const form = e.target;
+//       const govtIdType = form.govtIdType.value;
+//       const photoFile = form.photo.files[0];
+//       const govtIdPhotoFile = form.govtIdPhoto.files[0];
+
+//       if (!govtIdType || !photoFile || !govtIdPhotoFile) {
+//         throw new Error("All fields are required.");
+//       }
+
+//       const formData = new FormData();
+//       formData.append("govtIdType", govtIdType);
+//       formData.append("photo", photoFile);
+//       formData.append("govtIdPhoto", govtIdPhotoFile);
+
+//       const response = await axios.post(
+//         "http://localhost:5000/api/verify/verification",
+//         formData,
+//         {
+//           headers: {
+//             "Content-Type": "multipart/form-data",
+//             Authorization: `Bearer ${token}`, // Must include token
+//           },
+//         }
+//       );
+
+//       toast.success(response.data.message || "Verification submitted successfully");
+//       setVerificationStatus("pending");
+//       setShowModal(false);
+//     } catch (error) {
+//       console.error(error);
+//       toast.error(error.response?.data?.message || error.message || "Submission failed");
+//     } finally {
+//       setUploading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-background">
+//       <Toaster position="top-center" reverseOrder={false} />
+
+//       <div className="container mx-auto px-4 pt-24 pb-12">
+//         {!isVerified && (
+//           <Card className="mb-8 border-yellow-500/20 bg-yellow-500/10">
+//             <CardContent className="pt-6">
+//               {!verificationStatus ? (
+//                 <>
+//                   <h3 className="font-semibold mb-2">Verification Required</h3>
+//                   <p className="text-sm text-gray-500 mb-4">
+//                     Submit your documents for admin review to create trips.
+//                   </p>
+//                   <Button onClick={() => setShowModal(true)}>Submit Verification</Button>
+//                 </>
+//               ) : verificationStatus === "pending" ? (
+//                 <>
+//                   <h3 className="font-semibold mb-2">Verification Pending</h3>
+//                   <p className="text-sm text-gray-500 mb-4">Your verification is under review.</p>
+//                   <Button variant="outline" onClick={() => setShowModal(true)}>View Status</Button>
+//                 </>
+//               ) : (
+//                 <>
+//                   <p className="text-sm text-red-600 mb-4">Verification rejected. Please resubmit.</p>
+//                   <Button onClick={() => setShowModal(true)}>Resubmit Verification</Button>
+//                 </>
+//               )}
+//             </CardContent>
+//           </Card>
+//         )}
+
+//         {isVerified && (
+//           <Card className="border-green-500/20 bg-green-500/10">
+//             <CardContent className="pt-6">
+//               <h3 className="font-semibold text-green-600">✅ Your account is verified!</h3>
+//             </CardContent>
+//           </Card>
+//         )}
+//       </div>
+
+//       {showModal && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+//           <Card className="w-full max-w-lg">
+//             <CardHeader>
+//               <CardTitle>Submit Verification Documents</CardTitle>
+//             </CardHeader>
+//             <CardContent>
+//               <form className="space-y-6" onSubmit={handleSubmitVerification}>
+//                 <div className="space-y-2">
+//                   <Label htmlFor="govtIdType">Government ID Type *</Label>
+//                   <select
+//                     id="govtIdType"
+//                     name="govtIdType"
+//                     className="w-full border border-gray-300 rounded-lg px-3 py-2"
+//                     required
+//                   >
+//                     <option value="">Select ID Type</option>
+//                     <option value="driving license">Driving License</option>
+//                     <option value="aadhar card">Aadhar Card</option>
+//                   </select>
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="govtIdPhoto">Government ID *</Label>
+//                   <Input id="govtIdPhoto" name="govtIdPhoto" type="file" accept="image/*,.pdf" required />
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="photo">Profile Photo *</Label>
+//                   <Input id="photo" name="photo" type="file" accept="image/*" required />
+//                 </div>
+
+//                 <Button type="submit" className="w-full" disabled={uploading}>
+//                   {uploading ? "Uploading..." : <><Upload className="h-4 w-4 mr-2" /> Submit</>}
+//                 </Button>
+//                 <Button
+//                   type="button"
+//                   variant="outline"
+//                   className="w-full mt-2"
+//                   onClick={() => setShowModal(false)}
+//                 >
+//                   Cancel
+//                 </Button>
+//               </form>
+//             </CardContent>
+//           </Card>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }

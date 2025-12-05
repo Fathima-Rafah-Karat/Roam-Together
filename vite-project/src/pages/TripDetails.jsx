@@ -871,39 +871,60 @@ export default function TripDetails() {
                   </div>
                 </div>
               )}
-              {activeTab === "info" && (
-                <div>
-                  <h3 className="text-xl font-semibold mb-4">Trip Information</h3>
-
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-
-  {/* Inclusions */}
+         {activeTab === "info" && (
   <div>
-    <h3 className="text-lg font-semibold mb-2">Inclusions</h3>
-    <ul className="list-disc list-inside space-y-1">
-      {trip.inclusionspoint?.map((item, index) => (
-        <li key={index} className="capitalize">
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
+    <h3 className="text-xl font-semibold mb-4">Trip Information</h3>
 
-  {/* Exclusions */}
-  <div>
-    <h3 className="text-lg font-semibold mb-2">Exclusions</h3>
-    <ul className="list-disc list-inside space-y-1">
-      {trip.exclusionspoint?.map((item, index) => (
-        <li key={index} className="capitalize">
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
+    <table className="w-full border border-gray-300 rounded-lg overflow-hidden">
+      <thead className="bg-gray-100">
+        <tr>
+          <th className="p-3 text-left font-medium border-b">Inclusions</th>
+          <th className="p-3 text-left font-medium border-b">Exclusions</th>
+        </tr>
+      </thead>
 
-</div>
-                </div>
-              )}
+      <tbody>
+        <tr>
+          {/* INCLUSIONS */}
+          <td className="p-3 align-top">
+            <ul className="list-disc ml-5">
+              {trip.inclusionspoint &&
+                trip.inclusionspoint
+                  .join(",")                        // merge array into string
+                  .replace(/[\[\]"]/g, "")          // remove [" ]
+                  .split(",")                       // split
+                  .map(item => item.trim())         // trim spaces
+                  .filter(item => item !== "" && item !== "." && item !== ",") // remove empty
+                  .map((item, index) => (
+                    <li key={index} className="capitalize">
+                      {item}
+                    </li>
+                  ))}
+            </ul>
+          </td>
+
+          {/* EXCLUSIONS */}
+          <td className="p-3 align-top">
+            <ul className="list-disc ml-5">
+              {trip.exclusionspoint &&
+                trip.exclusionspoint
+                  .join(",")
+                  .replace(/[\[\]"]/g, "")
+                  .split(",")
+                  .map(item => item.trim())
+                  .filter(item => item !== "" && item !== "." && item !== ",")
+                  .map((item, index) => (
+                    <li key={index} className="capitalize">
+                      {item}
+                    </li>
+                  ))}
+            </ul>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+)}
 
 
             </CardContent>

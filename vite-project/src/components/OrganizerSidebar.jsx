@@ -25,10 +25,10 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 
 const organizerMenu = [
-     { title: "Verification", url: "/organizer/verify", icon: ClipboardCheck },
-//   { title: "Dashboard", url: "/organizer/dashboard", icon: LayoutDashboard },
-  { title: "Create Trip", url: "/organizer/create", icon: FilePlus },
-  { title: "Manage Trips", url: "/organizer/manage", icon: Users },
+    //  { title: "Verification", url: "/organizer/verify", icon: ClipboardCheck },
+  { title: "Dashboard", url: "/organizer/dashboard", icon: LayoutDashboard },
+  { title: "Create Trip", url: "/organizer/createtrip", icon: FilePlus },
+  { title: "Manage Trips", url: "/organizer/TripsList", icon: Users },
  
   { title: "Messages", url: "/organizer/messages", icon: MessageCircle },
 ];
