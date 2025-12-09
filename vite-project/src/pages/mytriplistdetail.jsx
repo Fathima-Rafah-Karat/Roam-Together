@@ -5,21 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  MapPin,
-  Calendar,
-  Users,
-  Clock,
-  MessageCircle,
-  CheckCircle,
-  ArrowLeft,
-  ChevronDown,
-  ChevronUp,
-  Coffee,
-  Bed,
-  Car,
-  Activity,
-  Edit,
-  X as XIcon,
+    MapPin,
+    Calendar, Users, Clock,
+    MessageCircle, CheckCircle,
+    ArrowLeft, ChevronDown,
+    ChevronUp,
+    Coffee, Bed, Car,
+    Activity, Edit,
+    X as XIcon,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -30,304 +23,329 @@ import axios from "axios";
 import toast from "react-hot-toast";
 
 export default function TripListDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+    const { id } = useParams();
+    const navigate = useNavigate();
 
-  const [trip, setTrip] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [participants, setParticipants] = useState([]);
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [openDays, setOpenDays] = useState({});
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const sliderRef = useRef(null);
-  const [activeTab, setActiveTab] = useState("itinerary");
+    const [trip, setTrip] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [participantsOpen, setParticipantsOpen] = useState(false);
+    const [participants, setParticipants] = useState([]);
+    const [showFullDescription, setShowFullDescription] = useState(false);
+    const [openDays, setOpenDays] = useState({});
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const sliderRef = useRef(null);
+    const [activeTab, setActiveTab] = useState("itinerary");
 
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const [participantCount, setParticipantCount] = useState(0);
+    const [participantCount, setParticipantCount] = useState(0);
+    const [openParticipant, setOpenParticipant] = useState(null);
+    const [emergencyContacts, setEmergencyContacts] = useState({});
 
-  // Edit dialog state
-  const [editOpen, setEditOpen] = useState(false);
-  const [editData, setEditData] = useState({
-    title: "",
-    description: "",
-    price: "",
-    location: "",
-    participants: "",
-    startDate: "",
-    endDate: "",
-    inclusionspoint: [],
-    exclusionspoint: [],
-    tripPhoto: [],
-    planDetails: [],
-    inclusions: {},
-  });
-
-  const [newInclusion, setNewInclusion] = useState("");
-  const [newExclusion, setNewExclusion] = useState("");
-
-  // Fetch trip
-  useEffect(() => {
-    const fetchTrip = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/traveler/${id}`);
-        setTrip(res.data.data || null);
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch trip details");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTrip();
-  }, [id]);
-
-  // Fetch participant count
-  useEffect(() => {
-    const fetchCount = async () => {
-      try {
-        if (!trip?._id) return;
-        const res = await axios.get(`http://localhost:5000/api/traveler/participants/${trip._id}`);
-        if (res.data.success) {
-          setParticipantCount(res.data.count);
-        }
-      } catch (err) {
-        console.error("Error fetching participant count:", err);
-      }
-    };
-    fetchCount();
-  }, [trip]);
-
-  // Auto slide
-  useEffect(() => {
-    if (trip?.tripPhoto?.length) {
-      const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev === trip.tripPhoto.length - 1 ? 0 : prev + 1));
-      }, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [trip]);
-
-  useEffect(() => {
-    if (sliderRef.current && trip?.tripPhoto?.length) {
-      sliderRef.current.scrollTo({
-        left: currentSlide * sliderRef.current.offsetWidth,
-        behavior: "smooth",
-      });
-    }
-  }, [currentSlide, trip]);
-
-  const toggleDay = (day) => {
-    setOpenDays((prev) => ({ ...prev, [day]: !prev[day] }));
-  };
-
-  const fetchParticipants = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/traveler/participants/${trip._id}`);
-      if (res.data.success) {
-        setParticipants(res.data.data);
-      }
-    } catch (error) {
-      console.error("Error loading participants:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (participantsOpen && trip?._id) {
-      fetchParticipants();
-    }
-  }, [participantsOpen, trip?._id]);
-
-  const openLightboxAt = (index) => {
-    if (!trip?.tripPhoto?.length) return;
-    const safeIndex = Math.max(0, Math.min(index, trip.tripPhoto.length - 1));
-    setLightboxIndex(safeIndex);
-    setLightboxOpen(true);
-  };
-
-  const prevLightbox = () => {
-    if (!trip?.tripPhoto?.length) return;
-    setLightboxIndex((prev) => (prev === 0 ? trip.tripPhoto.length - 1 : prev - 1));
-  };
-
-  const nextLightbox = () => {
-    if (!trip?.tripPhoto?.length) return;
-    setLightboxIndex((prev) => (prev === trip.tripPhoto.length - 1 ? 0 : prev + 1));
-  };
-
-  const handleChat = (phone) => {
-    if (phone) window.open(`https://wa.me/${phone}`, "_blank");
-  };
-
-  if (loading)
-    return <p className="text-center py-10 text-muted-foreground">Loading trip...</p>;
-
-  if (!trip)
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <h2 className="text-2xl font-bold mb-4">Trip not found</h2>
-        <Button onClick={() => navigate("/dash/dashboard")}>Go Back</Button>
-      </div>
-    );
-
-  // Build inclusionsObj for icons
-  const inclusionsObj = {};
-  if (trip.inclusions) {
-    if (typeof trip.inclusions === "string") {
-      trip.inclusions.split(",").forEach((item) => {
-        inclusionsObj[item.trim()] = true;
-      });
-    } else {
-      Object.assign(inclusionsObj, trip.inclusions);
-    }
-  }
-
-  const handleDeleteTrip = async () => {
-    try {
-      const confirm = await new Promise((resolve) => {
-        toast(
-          (t) => (
-            <div className="flex flex-col gap-2">
-              <span>Are you sure you want to cancel this trip?</span>
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    resolve(false);
-                  }}
-                >
-                  No
-                </button>
-                <button
-                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  onClick={() => {
-                    toast.dismiss(t.id);
-                    resolve(true);
-                  }}
-                >
-                  Yes
-                </button>
-              </div>
-            </div>
-          ),
-          { duration: Infinity }
-        );
-      });
-
-      if (!confirm) return;
-
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Unauthorized — please login again");
-        return;
-      }
-
-      const res = await axios.delete(
-        `http://localhost:5000/api/organizer/deletetrip/${trip._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (res.data.success) {
-        toast.success(res.data.message||"trip delete successfully");
-        navigate(-1);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(error.response?.data?.message || "Failed to cancel trip");
-    }
-  };
-
-  const openEditDialog = () => {
-    setEditData({
-      title: trip.title || "",
-      description: trip.description || "",
-      price: trip.price || "",
-      location: trip.location || "",
-      participants: trip.participants || "",
-      startDate: trip.startDate ? trip.startDate.substring(0, 10) : "",
-      endDate: trip.endDate ? trip.endDate.substring(0, 10) : "",
-      inclusionspoint: Array.isArray(trip.inclusionspoint)
-        ? [...trip.inclusionspoint]
-        : trip.inclusionspoint
-          ? trip.inclusionspoint.split(",").map(p => p.trim())
-          : [],
-      exclusionspoint: Array.isArray(trip.exclusionspoint)
-        ? [...trip.exclusionspoint]
-        : trip.exclusionspoint
-          ? trip.exclusionspoint.split(",").map(p => p.trim())
-          : [],
-      planDetails: Array.isArray(trip.planDetails) ? trip.planDetails.map(day => ({ ...day })) : [],
-      tripPhoto: trip.tripPhoto || [],
-      inclusions: trip.inclusions || {},
+    // Edit dialog state
+    const [editOpen, setEditOpen] = useState(false);
+    const [editData, setEditData] = useState({
+        title: "",
+        description: "",
+        price: "",
+        location: "",
+        participants: "",
+        startDate: "",
+        endDate: "",
+        inclusionspoint: [],
+        exclusionspoint: [],
+        tripPhoto: [],
+        planDetails: [],
+        inclusions: {},
     });
-    setEditOpen(true);
-  };
 
-  const cleanPointsToArray = (raw) => {
-    if (!raw && raw !== "") return [];
-    const joined = Array.isArray(raw) ? raw.join(",") : String(raw);
-    return joined
-      .replace(/[\[\]"]/g, "")
-      .split(",")
-      .map((x) => x.trim())
-      .map((x) => x.replace(/^[.,\s]+|[.,\s]+$/g, ""))
-      .filter((x) => x && x !== "." && x !== ",");
-  };
+    const [newInclusion, setNewInclusion] = useState("");
+    const [newExclusion, setNewExclusion] = useState("");
 
-  const handleUpdateTrip = async (e) => {
-    e?.preventDefault?.();
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Unauthorized — please login again");
-        return;
-      }
+    // Fetch trip
+    useEffect(() => {
+        const fetchTrip = async () => {
+            try {
+                setLoading(true);
+                const res = await axios.get(`http://localhost:5000/api/traveler/${id}`);
+                setTrip(res.data.data || null);
+            } catch (err) {
+                console.error(err);
+                toast.error("Failed to fetch trip details");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchTrip();
+    }, [id]);
 
-      const formData = new FormData();
-      formData.append("title", editData.title);
-      formData.append("description", editData.description);
-      formData.append("price", editData.price);
-      formData.append("location", editData.location);
-      formData.append("participants", editData.participants);
-      formData.append("startDate", editData.startDate);
-      formData.append("endDate", editData.endDate);
-      formData.append("inclusionspoint", JSON.stringify(cleanPointsToArray(editData.inclusionspoint)));
-      formData.append("exclusionspoint", JSON.stringify(cleanPointsToArray(editData.exclusionspoint)));
-      formData.append("planDetails", JSON.stringify(editData.planDetails));
 
-      editData.tripPhoto.forEach((photo) => {
-        if (photo instanceof File) {
-          formData.append("tripPhoto", photo);
+
+    const fetchEmergencyContacts = async (travelerId) => {
+        try {
+            const token = localStorage.getItem("token"); // or "organizerToken"
+
+            const res = await axios.get(
+                `http://localhost:5000/api/organizer/viewemergency?travelerId=${travelerId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            setEmergencyContacts((prev) => ({
+                ...prev,
+                [travelerId]: res.data.contacts || [],
+            }));
+        } catch (err) {
+            console.error("Emergency contact fetch error", err);
         }
-      });
+    };
 
-      const res = await axios.put(
-        `http://localhost:5000/api/organizer/trip/${trip._id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
+
+    // Fetch participant count
+    useEffect(() => {
+        const fetchCount = async () => {
+            try {
+                if (!trip?._id) return;
+                const res = await axios.get(`http://localhost:5000/api/traveler/participants/${trip._id}`);
+                if (res.data.success) {
+                    setParticipantCount(res.data.count);
+                }
+            } catch (err) {
+                console.error("Error fetching participant count:", err);
+            }
+        };
+        fetchCount();
+    }, [trip]);
+
+    // Auto slide
+    useEffect(() => {
+        if (trip?.tripPhoto?.length) {
+            const interval = setInterval(() => {
+                setCurrentSlide((prev) => (prev === trip.tripPhoto.length - 1 ? 0 : prev + 1));
+            }, 2000);
+            return () => clearInterval(interval);
         }
-      );
+    }, [trip]);
 
-      if (res.data?.success) {
-        toast.success("Trip updated successfully");
-        setTrip(res.data.data || { ...trip, ...editData });
-        setEditOpen(false);
-      } else {
-        toast.error(res.data?.message || "Failed to update trip");
-      }
-    } catch (err) {
-      console.error("Update error:", err);
-      toast.error(err.response?.data?.message || "Failed to update trip");
+    useEffect(() => {
+        if (sliderRef.current && trip?.tripPhoto?.length) {
+            sliderRef.current.scrollTo({
+                left: currentSlide * sliderRef.current.offsetWidth,
+                behavior: "smooth",
+            });
+        }
+    }, [currentSlide, trip]);
+
+    const toggleDay = (day) => {
+        setOpenDays((prev) => ({ ...prev, [day]: !prev[day] }));
+    };
+
+    const fetchParticipants = async () => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/traveler/participants/${trip._id}`);
+            if (res.data.success) {
+                setParticipants(res.data.data);
+            }
+        } catch (error) {
+            console.error("Error loading participants:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (participantsOpen && trip?._id) {
+            fetchParticipants();
+        }
+    }, [participantsOpen, trip?._id]);
+
+    const openLightboxAt = (index) => {
+        if (!trip?.tripPhoto?.length) return;
+        const safeIndex = Math.max(0, Math.min(index, trip.tripPhoto.length - 1));
+        setLightboxIndex(safeIndex);
+        setLightboxOpen(true);
+    };
+
+    const prevLightbox = () => {
+        if (!trip?.tripPhoto?.length) return;
+        setLightboxIndex((prev) => (prev === 0 ? trip.tripPhoto.length - 1 : prev - 1));
+    };
+
+    const nextLightbox = () => {
+        if (!trip?.tripPhoto?.length) return;
+        setLightboxIndex((prev) => (prev === trip.tripPhoto.length - 1 ? 0 : prev + 1));
+    };
+
+    const handleChat = (phone) => {
+        if (phone) window.open(`https://wa.me/${phone}`, "_blank");
+    };
+
+    if (loading)
+        return <p className="text-center py-10 text-muted-foreground">Loading trip...</p>;
+
+    if (!trip)
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <h2 className="text-2xl font-bold mb-4">Trip not found</h2>
+                <Button onClick={() => navigate("/dash/dashboard")}>Go Back</Button>
+            </div>
+        );
+
+    // Build inclusionsObj for icons
+    const inclusionsObj = {};
+    if (trip.inclusions) {
+        if (typeof trip.inclusions === "string") {
+            trip.inclusions.split(",").forEach((item) => {
+                inclusionsObj[item.trim()] = true;
+            });
+        } else {
+            Object.assign(inclusionsObj, trip.inclusions);
+        }
     }
-  };
+
+    const handleDeleteTrip = async () => {
+        try {
+            const confirm = await new Promise((resolve) => {
+                toast(
+                    (t) => (
+                        <div className="flex flex-col gap-2">
+                            <span>Are you sure you want to cancel this trip?</span>
+                            <div className="flex justify-end gap-2 mt-2">
+                                <button
+                                    className="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                                    onClick={() => {
+                                        toast.dismiss(t.id);
+                                        resolve(false);
+                                    }}>
+                                    No
+                                </button>
+                                <button
+                                    className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                                    onClick={() => {
+                                        toast.dismiss(t.id);
+                                        resolve(true);
+                                    }} >
+                                    Yes
+                                </button>
+                            </div>
+                        </div>
+                    ),
+                    { duration: Infinity }
+                );
+            });
+
+            if (!confirm) return;
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                toast.error("Unauthorized — please login again");
+                return;
+            }
+
+            const res = await axios.delete(
+                `http://localhost:5000/api/organizer/deletetrip/${trip._id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.success) {
+                toast.success(res.data.message || "trip delete successfully");
+                navigate(-1);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to cancel trip");
+        }
+    };
+
+    const openEditDialog = () => {
+        setEditData({
+            title: trip.title || "",
+            description: trip.description || "",
+            price: trip.price || "",
+            location: trip.location || "",
+            participants: trip.participants || "",
+            startDate: trip.startDate ? trip.startDate.substring(0, 10) : "",
+            endDate: trip.endDate ? trip.endDate.substring(0, 10) : "",
+            inclusionspoint: Array.isArray(trip.inclusionspoint)
+                ? [...trip.inclusionspoint]
+                : trip.inclusionspoint
+                    ? trip.inclusionspoint.split(",").map(p => p.trim())
+                    : [],
+            exclusionspoint: Array.isArray(trip.exclusionspoint)
+                ? [...trip.exclusionspoint]
+                : trip.exclusionspoint
+                    ? trip.exclusionspoint.split(",").map(p => p.trim())
+                    : [],
+            planDetails: Array.isArray(trip.planDetails) ? trip.planDetails.map(day => ({ ...day })) : [],
+            tripPhoto: trip.tripPhoto || [],
+            inclusions: trip.inclusions || {},
+        });
+        setEditOpen(true);
+    };
+
+    const cleanPointsToArray = (raw) => {
+        if (!raw && raw !== "") return [];
+        const joined = Array.isArray(raw) ? raw.join(",") : String(raw);
+        return joined
+            .replace(/[\[\]"]/g, "")
+            .split(",")
+            .map((x) => x.trim())
+            .map((x) => x.replace(/^[.,\s]+|[.,\s]+$/g, ""))
+            .filter((x) => x && x !== "." && x !== ",");
+    };
+
+    const handleUpdateTrip = async (e) => {
+        e?.preventDefault?.();
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                toast.error("Unauthorized — please login again");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("title", editData.title);
+            formData.append("description", editData.description);
+            formData.append("price", editData.price);
+            formData.append("location", editData.location);
+            formData.append("participants", editData.participants);
+            formData.append("startDate", editData.startDate);
+            formData.append("endDate", editData.endDate);
+            formData.append("inclusionspoint", JSON.stringify(cleanPointsToArray(editData.inclusionspoint)));
+            formData.append("exclusionspoint", JSON.stringify(cleanPointsToArray(editData.exclusionspoint)));
+            formData.append("planDetails", JSON.stringify(editData.planDetails));
+
+            editData.tripPhoto.forEach((photo) => {
+                if (photo instanceof File) {
+                    formData.append("tripPhoto", photo);
+                }
+            });
+
+            const res = await axios.put(
+                `http://localhost:5000/api/organizer/trip/${trip._id}`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            if (res.data?.success) {
+                toast.success("Trip updated successfully");
+                setTrip(res.data.data || { ...trip, ...editData });
+                setEditOpen(false);
+            } else {
+                toast.error(res.data?.message || "Failed to update trip");
+            }
+        } catch (err) {
+            console.error("Update error:", err);
+            toast.error(err.response?.data?.message || "Failed to update trip");
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -342,16 +360,14 @@ export default function TripListDetails() {
                         <div className="relative">
                             <div
                                 ref={sliderRef}
-                                className="h-96 overflow-x-auto flex gap-2 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-400"
-                            >
+                                className="h-96 overflow-x-auto flex gap-2 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-400">
                                 {trip.tripPhoto?.length > 0 ? (
                                     trip.tripPhoto.map((photo, index) => (
                                         <img
                                             key={index}
                                             src={`http://localhost:5000/${photo.replace(/^\\+/, "")}`}
                                             alt={`${trip.title} ${index + 1}`}
-                                            className="h-96 w-full flex-shrink-0 object-cover rounded-lg snap-center"
-                                        />
+                                            className="h-96 w-full flex-shrink-0 object-cover rounded-lg snap-center" />
                                     ))
                                 ) : (
                                     <img
@@ -694,323 +710,319 @@ export default function TripListDetails() {
 
                                     <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-auto">
                                         <DialogHeader>
-                                            <DialogTitle className="!text-xl !font-bold flex justify-start gap-3"><Edit className="text-red-500"/>Edit Trip Details</DialogTitle>
+                                            <DialogTitle className="!text-xl !font-bold flex justify-start gap-3"><Edit className="text-red-500" />Edit Trip Details</DialogTitle>
                                             <p> Update the information for this trip.</p>
                                         </DialogHeader>
 
-                                      <form onSubmit={handleUpdateTrip} className="space-y-6">
+                                        <form onSubmit={handleUpdateTrip} className="space-y-6">
 
-          {/* BASIC INFO */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* BASIC INFO */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <div>
-              <Label>Title</Label>
-              <Input
-                placeholder="Trip Title"
-                value={editData.title}
-                onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-              />
-            </div>
+                                                <div>
+                                                    <Label>Title</Label>
+                                                    <Input
+                                                        placeholder="Trip Title"
+                                                        value={editData.title}
+                                                        onChange={(e) => setEditData({ ...editData, title: e.target.value })}
+                                                    />
+                                                </div>
 
-            <div>
-              <Label>Price</Label>
-              <Input
-                placeholder="Price"
-                value={editData.price}
-                onChange={(e) => setEditData({ ...editData, price: e.target.value })}
-              />
-            </div>
+                                                <div>
+                                                    <Label>Price</Label>
+                                                    <Input
+                                                        placeholder="Price"
+                                                        value={editData.price}
+                                                        onChange={(e) => setEditData({ ...editData, price: e.target.value })}
+                                                    />
+                                                </div>
 
-            <div>
-              <Label>Location</Label>
-              <Input
-                placeholder="Location"
-                value={editData.location}
-                onChange={(e) => setEditData({ ...editData, location: e.target.value })}
-              />
-            </div>
+                                                <div>
+                                                    <Label>Location</Label>
+                                                    <Input
+                                                        placeholder="Location"
+                                                        value={editData.location}
+                                                        onChange={(e) => setEditData({ ...editData, location: e.target.value })}
+                                                    />
+                                                </div>
 
-            <div>
-              <Label>Participants</Label>
-              <Input
-                placeholder="Participants"
-                value={editData.participants}
-                onChange={(e) => setEditData({ ...editData, participants: e.target.value })}
-              />
-            </div>
+                                                <div>
+                                                    <Label>Participants</Label>
+                                                    <Input
+                                                        placeholder="Participants"
+                                                        value={editData.participants}
+                                                        onChange={(e) => setEditData({ ...editData, participants: e.target.value })}
+                                                    />
+                                                </div>
 
-            <div>
-              <Label>Start Date</Label>
-              <Input
-                type="date"
-                value={editData.startDate}
-                onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
-              />
-            </div>
+                                                <div>
+                                                    <Label>Start Date</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={editData.startDate}
+                                                        onChange={(e) => setEditData({ ...editData, startDate: e.target.value })}
+                                                    />
+                                                </div>
 
-            <div>
-              <Label>End Date</Label>
-              <Input
-                type="date"
-                value={editData.endDate}
-                onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
-              />
-            </div>
-          </div>
+                                                <div>
+                                                    <Label>End Date</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={editData.endDate}
+                                                        onChange={(e) => setEditData({ ...editData, endDate: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
 
-          {/* DESCRIPTION */}
-          <div>
-            <Label>Description</Label>
-            <Textarea
-              rows={4}
-              placeholder="Description"
-              value={editData.description}
-              onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-            />
-          </div>
+                                            {/* DESCRIPTION */}
+                                            <div>
+                                                <Label>Description</Label>
+                                                <Textarea
+                                                    rows={4}
+                                                    placeholder="Description"
+                                                    value={editData.description}
+                                                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                                                />
+                                            </div>
 
-          {/* CHECKBOX INCLUSIONS */}
-          <div>
-            <Label className="font-semibold text-lg">Inclusions</Label>
-            <div className="flex gap-4 flex-wrap mt-2">
-              {["meals", "stay", "transport", "activities"].map((inc) => (
-                <label key={inc} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={!!editData.inclusions?.[inc]}
-                    onChange={(e) =>
-                      setEditData({
-                        ...editData,
-                        inclusions: {
-                          ...editData.inclusions,
-                          [inc]: e.target.checked,
-                        },
-                      })
-                    }
-                  />
-                  <span className="capitalize">{inc}</span>
-                </label>
-              ))}
-            </div>
-          </div>
+                                            {/* CHECKBOX INCLUSIONS */}
+                                            <div>
+                                                <Label className="font-semibold text-lg">Inclusions</Label>
+                                                <div className="flex gap-4 flex-wrap mt-2">
+                                                    {["meals", "stay", "transport", "activities"].map((inc) => (
+                                                        <label key={inc} className="flex items-center gap-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={!!editData.inclusions?.[inc]}
+                                                                onChange={(e) =>
+                                                                    setEditData({
+                                                                        ...editData,
+                                                                        inclusions: {
+                                                                            ...editData.inclusions,
+                                                                            [inc]: e.target.checked,
+                                                                        },
+                                                                    })
+                                                                }
+                                                            />
+                                                            <span className="capitalize">{inc}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
 
-         {/* INCLUSION POINTS */}
-<div className="space-y-2">
-  <Label className="font-semibold text-lg">Inclusion Points</Label>
-  <div className="flex gap-2">
-    <Input
-      value={newInclusion}
-      placeholder="Add inclusion point"
-      onChange={(e) => setNewInclusion(e.target.value)}
-    />
-    <Button
-      type="button"
-      onClick={() => {
-        if (newInclusion.trim()) {
-          setEditData({
-            ...editData,
-            inclusionspoint: [...editData.inclusionspoint, newInclusion.trim()],
-          });
-          setNewInclusion("");
-        }
-      }}
-    >
-      Add
-    </Button>
-  </div>
-  <div className="flex flex-wrap gap-2 mt-2">
-    {editData.inclusionspoint.map((point, index) => (
-      <div
-        key={index}
-        className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
-      >
-        <span>{point}</span>
-        <XIcon
-          size={14}
-          className="cursor-pointer text-red-500 hover:text-red-600"
-          onClick={() =>
-            setEditData({
-              ...editData,
-              inclusionspoint: editData.inclusionspoint.filter((_, i) => i !== index),
-            })
-          }
-        />
-      </div>
-    ))}
-  </div>
-</div>
+                                            {/* INCLUSION POINTS */}
+                                            <div className="space-y-2">
+                                                <Label className="font-semibold text-lg">Inclusion Points</Label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        value={newInclusion}
+                                                        placeholder="Add inclusion point"
+                                                        onChange={(e) => setNewInclusion(e.target.value)}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (newInclusion.trim()) {
+                                                                setEditData({
+                                                                    ...editData,
+                                                                    inclusionspoint: [...editData.inclusionspoint, newInclusion.trim()],
+                                                                });
+                                                                setNewInclusion("");
+                                                            }
+                                                        }}
+                                                    >
+                                                        Add
+                                                    </Button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {editData.inclusionspoint.map((point, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
+                                                        >
+                                                            <span>{point}</span>
+                                                            <XIcon
+                                                                size={14}
+                                                                className="cursor-pointer text-red-500 hover:text-red-600"
+                                                                onClick={() =>
+                                                                    setEditData({
+                                                                        ...editData,
+                                                                        inclusionspoint: editData.inclusionspoint.filter((_, i) => i !== index),
+                                                                    })
+                                                                }
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
 
-{/* EXCLUSION POINTS */}
-<div className="space-y-2">
-  <Label className="font-semibold text-lg">Exclusion Points</Label>
-  <div className="flex gap-2">
-    <Input
-      value={newExclusion}
-      placeholder="Add exclusion point"
-      onChange={(e) => setNewExclusion(e.target.value)}
-    />
-    <Button
-      type="button"
-      onClick={() => {
-        if (newExclusion.trim()) {
-          setEditData({
-            ...editData,
-            exclusionspoint: [...editData.exclusionspoint, newExclusion.trim()],
-          });
-          setNewExclusion("");
-        }
-      }}
-    >
-      Add
-    </Button>
-  </div>
-  <div className="flex flex-wrap gap-2 mt-2">
-    {editData.exclusionspoint.map((point, index) => (
-      <div
-        key={index}
-        className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm"
-      >
-        <span>{point}</span>
-        <XIcon
-          size={14}
-          className="cursor-pointer text-red-500 hover:text-red-600"
-          onClick={() =>
-            setEditData({
-              ...editData,
-              exclusionspoint: editData.exclusionspoint.filter((_, i) => i !== index),
-            })
-          }
-        />
-      </div>
-    ))}
-  </div>
-</div>
+                                            {/* EXCLUSION POINTS */}
+                                            <div className="space-y-2">
+                                                <Label className="font-semibold text-lg">Exclusion Points</Label>
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        value={newExclusion}
+                                                        placeholder="Add exclusion point"
+                                                        onChange={(e) => setNewExclusion(e.target.value)}
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (newExclusion.trim()) {
+                                                                setEditData({
+                                                                    ...editData,
+                                                                    exclusionspoint: [...editData.exclusionspoint, newExclusion.trim()],
+                                                                });
+                                                                setNewExclusion("");
+                                                            }
+                                                        }}
+                                                    >
+                                                        Add
+                                                    </Button>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {editData.exclusionspoint.map((point, index) => (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm">
+                                                            <span>{point}</span>
+                                                            <XIcon
+                                                                size={14}
+                                                                className="cursor-pointer text-red-500 hover:text-red-600"
+                                                                onClick={() =>
+                                                                    setEditData({
+                                                                        ...editData,
+                                                                        exclusionspoint: editData.exclusionspoint.filter((_, i) => i !== index),
+                                                                    })
+                                                                }
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            {/* PHOTOS */}
+                                            <div>
+                                                <Label className="font-semibold text-lg">Trip Photos</Label>
+                                                <div className="flex gap-3 flex-wrap mt-2">
+                                                    {editData.tripPhoto.map((photo, idx) => {
+                                                        const url =
+                                                            typeof photo === "string"
+                                                                ? `http://localhost:5000/${photo}`
+                                                                : URL.createObjectURL(photo);
 
+                                                        return (
+                                                            <div key={idx} className="relative">
+                                                                <img
+                                                                    src={url}
+                                                                    alt=""
+                                                                    className="w-24 h-16 object-cover rounded"
+                                                                />
+                                                                <XIcon
+                                                                    className="absolute top-1 right-1 text-red-500 cursor-pointer"
+                                                                    size={16}
+                                                                    onClick={() =>
+                                                                        setEditData({
+                                                                            ...editData,
+                                                                            tripPhoto: editData.tripPhoto.filter((_, i) => i !== idx),
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    <Input
+                                                        type="file"
+                                                        multiple
+                                                        onChange={(e) =>
+                                                            setEditData({
+                                                                ...editData,
+                                                                tripPhoto: [...editData.tripPhoto, ...Array.from(e.target.files)],
+                                                            })
+                                                        }
+                                                    />
+                                                </div>
+                                            </div>
 
-          {/* PHOTOS */}
-          <div>
-            <Label className="font-semibold text-lg">Trip Photos</Label>
-            <div className="flex gap-3 flex-wrap mt-2">
-              {editData.tripPhoto.map((photo, idx) => {
-                const url =
-                  typeof photo === "string"
-                    ? `http://localhost:5000/${photo}`
-                    : URL.createObjectURL(photo);
+                                            {/* PLAN DETAILS */}
+                                            <div>
+                                                <Label className="text-lg font-semibold">Plan Details</Label>
+                                                <div className="space-y-3 mt-2">
+                                                    {editData.planDetails.map((dayItem, idx) => (
+                                                        <div key={idx} className="flex gap-3 items-start">
 
-                return (
-                  <div key={idx} className="relative">
-                    <img
-                      src={url}
-                      alt=""
-                      className="w-24 h-16 object-cover rounded"
-                    />
-                    <XIcon
-                      className="absolute top-1 right-1 text-red-500 cursor-pointer"
-                      size={16}
-                      onClick={() =>
-                        setEditData({
-                          ...editData,
-                          tripPhoto: editData.tripPhoto.filter((_, i) => i !== idx),
-                        })
-                      }
-                    />
-                  </div>
-                );
-              })}
-              <Input
-                type="file"
-                multiple
-                onChange={(e) =>
-                  setEditData({
-                    ...editData,
-                    tripPhoto: [...editData.tripPhoto, ...Array.from(e.target.files)],
-                  })
-                }
-              />
-            </div>
-          </div>
+                                                            <Input
+                                                                type="number"
+                                                                placeholder="Day"
+                                                                className="w-20"
+                                                                value={dayItem.day}
+                                                                onChange={(e) => {
+                                                                    const updated = [...editData.planDetails];
+                                                                    updated[idx].day = Number(e.target.value);
+                                                                    setEditData({ ...editData, planDetails: updated });
+                                                                }}
+                                                            />
 
-          {/* PLAN DETAILS */}
-          <div>
-            <Label className="text-lg font-semibold">Plan Details</Label>
-            <div className="space-y-3 mt-2">
-              {editData.planDetails.map((dayItem, idx) => (
-                <div key={idx} className="flex gap-3 items-start">
+                                                            <Input
+                                                                placeholder="Title"
+                                                                className="w-1/4"
+                                                                value={dayItem.title}
+                                                                onChange={(e) => {
+                                                                    const updated = [...editData.planDetails];
+                                                                    updated[idx].title = e.target.value;
+                                                                    setEditData({ ...editData, planDetails: updated });
+                                                                }}
+                                                            />
 
-                  <Input
-                    type="number"
-                    placeholder="Day"
-                    className="w-20"
-                    value={dayItem.day}
-                    onChange={(e) => {
-                      const updated = [...editData.planDetails];
-                      updated[idx].day = Number(e.target.value);
-                      setEditData({ ...editData, planDetails: updated });
-                    }}
-                  />
+                                                            <Textarea
+                                                                placeholder="Description"
+                                                                className="w-1/2"
+                                                                rows={2}
+                                                                value={dayItem.plan}
+                                                                onChange={(e) => {
+                                                                    const updated = [...editData.planDetails];
+                                                                    updated[idx].plan = e.target.value;
+                                                                    setEditData({ ...editData, planDetails: updated });
+                                                                }}
+                                                            />
 
-                  <Input
-                    placeholder="Title"
-                    className="w-1/4"
-                    value={dayItem.title}
-                    onChange={(e) => {
-                      const updated = [...editData.planDetails];
-                      updated[idx].title = e.target.value;
-                      setEditData({ ...editData, planDetails: updated });
-                    }}
-                  />
+                                                            <Button
+                                                                variant="destructive"
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const updated = [...editData.planDetails];
+                                                                    updated.splice(idx, 1);
+                                                                    setEditData({ ...editData, planDetails: updated });
+                                                                }}>
+                                                                Remove
+                                                            </Button>
+                                                        </div>
+                                                    ))}
 
-                  <Textarea
-                    placeholder="Description"
-                    className="w-1/2"
-                    rows={2}
-                    value={dayItem.plan}
-                    onChange={(e) => {
-                      const updated = [...editData.planDetails];
-                      updated[idx].plan = e.target.value;
-                      setEditData({ ...editData, planDetails: updated });
-                    }}
-                  />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setEditData({
+                                                                ...editData,
+                                                                planDetails: [
+                                                                    ...editData.planDetails,
+                                                                    { day: "", title: "", plan: "" },
+                                                                ],
+                                                            })
+                                                        }
+                                                    >
+                                                        Add Day
+                                                    </Button>
+                                                </div>
+                                            </div>
 
-                  <Button
-                    variant="destructive"
-                    type="button"
-                    onClick={() => {
-                      const updated = [...editData.planDetails];
-                      updated.splice(idx, 1);
-                      setEditData({ ...editData, planDetails: updated });
-                    }}
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ))}
-
-              <Button
-                type="button"
-                onClick={() =>
-                  setEditData({
-                    ...editData,
-                    planDetails: [
-                      ...editData.planDetails,
-                      { day: "", title: "", plan: "" },
-                    ],
-                  })
-                }
-              >
-                Add Day
-              </Button>
-            </div>
-          </div>
-
-          {/* ACTION BUTTONS */}
-          <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" type="button" onClick={() => setEditOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">Save Changes</Button>
-          </div>
-        </form>
+                                            {/* ACTION BUTTONS */}
+                                            <div className="flex justify-end gap-3 pt-4">
+                                                <Button variant="outline" type="button" onClick={() => setEditOpen(false)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button type="submit">Save Changes</Button>
+                                            </div>
+                                        </form>
 
                                     </DialogContent>
                                 </div>
@@ -1025,7 +1037,7 @@ export default function TripListDetails() {
                                     </Button>
                                 </DialogTrigger>
 
-                                <DialogContent className="sm:max-w-[500px]">
+                                <DialogContent className="sm:max-w-[700px]">
                                     <DialogHeader>
                                         <DialogTitle>Trip Participants</DialogTitle>
                                     </DialogHeader>
@@ -1037,24 +1049,58 @@ export default function TripListDetails() {
                                             participants.map((p) => (
                                                 <div
                                                     key={p._id}
-                                                    className="flex items-center gap-3 p-2 border rounded-md"
+                                                    className="border rounded-md p-2"
                                                 >
-                                                    <Avatar>
-                                                        <AvatarImage
-                                                            src={`http://localhost:5000/${p.photo?.replace(/^\\+/, "")}`}
+                                                    {/* Main row */}
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <Avatar>
+                                                                <AvatarImage src={`http://localhost:5000/${p.photo?.replace(/^\\+/, "")}`} />
+                                                                <AvatarFallback>{p.name?.charAt(0)}</AvatarFallback>
+                                                            </Avatar>
+
+                                                            <div>
+                                                                <p className="font-medium capitalize">{p.name}</p>
+                                                                <p className="text-sm text-muted-foreground">{p.email}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <ChevronDown
+                                                            className={`cursor-pointer transition-transform ${openParticipant === p._id ? "rotate-180" : ""}`}
+                                                            onClick={() => {
+                                                                if (openParticipant === p._id) {
+                                                                    setOpenParticipant(null);
+                                                                } else {
+                                                                    setOpenParticipant(p._id);
+                                                                    fetchEmergencyContacts(p._id);
+                                                                }
+                                                            }}
                                                         />
-                                                        <AvatarFallback>{p.name?.charAt(0)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div>
-                                                        <p className="font-medium capitalize">{p.name}</p>
-                                                        <p className="text-sm text-muted-foreground">{p.email}</p>
-                                                        <button
-                                                            onClick={() => handleChat(p.phone)}
-                                                            className="text-green-600 text-sm underline"
-                                                        >
-                                                            Chat
-                                                        </button>
                                                     </div>
+
+                                                    {/* Emergency Contact Dropdown */}
+                                                    {openParticipant === p._id && (
+                                                        <div className="mt-3 bg-gray-50 p-3 rounded-md animate-slideDown">
+                                                            <h4 className="font-semibold text-sm mb-2">Emergency Contacts</h4>
+
+                                                            {emergencyContacts[p._id]?.length > 0 ? (
+                                                                emergencyContacts[p._id].map((c, idx) => (
+                                                                    <div
+                                                                        key={idx}
+                                                                        className="p-2 border rounded-md mb-2 bg-white"
+                                                                    >
+                                                                        <p className="font-medium">{c.name}</p>
+                                                                        <p className="text-sm">Phone: {c.phone}</p>
+                                                                        <p className="text-sm text-muted-foreground">
+                                                                            Relation: {c.relation}
+                                                                        </p>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <p className="text-sm text-muted-foreground">No emergency contacts found.</p>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))
                                         )}
@@ -1062,21 +1108,19 @@ export default function TripListDetails() {
                                 </DialogContent>
                             </Dialog>
 
+
                             <Button
                                 variant="secondary"
                                 className="w-full gap-2"
-                                onClick={() => handleChat(trip.contactPhone)}
-                            >
+                                onClick={() => handleChat(trip.contactPhone)}>
                                 <MessageCircle className="h-4 w-4" /> Chat with Group
                             </Button>
 
                             <Button
                                 className="w-full bg-red-600 text-white hover:bg-red-700"
-                                onClick={handleDeleteTrip}
-                            >
+                                onClick={handleDeleteTrip}>
                                 Cancel
                             </Button>
-
                             <Separator />
 
                             <div className="space-y-2 text-sm text-muted-foreground">

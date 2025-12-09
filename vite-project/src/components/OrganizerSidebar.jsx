@@ -30,7 +30,7 @@ const organizerMenu = [
   { title: "Create Trip", url: "/organizer/createtrip", icon: FilePlus },
   { title: "Manage Trips", url: "/organizer/TripsList", icon: Users },
  
-  { title: "Messages", url: "/organizer/messages", icon: MessageCircle },
+  // { title: "Messages", url: "/organizer/messages", icon: MessageCircle },
 ];
 
 export function OrganizerSidebar() {

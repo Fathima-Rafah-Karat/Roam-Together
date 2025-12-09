@@ -388,7 +388,6 @@ export default function TripDetails() {
   const [participantCount, setParticipantCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState(null);
 
-
   // Fetch participant count when component loads or when participants change
   useEffect(() => {
     const fetchCount = async () => {
@@ -409,6 +408,7 @@ export default function TripDetails() {
 
     fetchCount();
   }, [trip]);
+  
 
   // Fetch trip details
   useEffect(() => {
@@ -1096,10 +1096,6 @@ export default function TripDetails() {
                 </DialogContent>
               </Dialog>
 
-
-             
-
-
               <Button
                 variant="secondary"
                 className="w-full gap-2"
@@ -1107,6 +1103,8 @@ export default function TripDetails() {
               >
                 <MessageCircle className="h-4 w-4" /> Chat with Group
               </Button>
+  
+
 
               <Separator />
 
