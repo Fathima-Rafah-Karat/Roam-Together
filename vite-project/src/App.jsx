@@ -24,6 +24,10 @@ import CreateTrip from "./pages/createtrip";
 import Verification from "./pages/veification";
 import TripsList from "./pages/mytriplist";
 import TripListDetails from "./pages/mytriplistdetail";
+import { LayoutAdmin } from "./components/LayoutAdmin";
+import Manageuser from "./pages/manageuser";
+import Verifyorganizers from "./pages/Verifyorganizers";
+import Trips from "./pages/Trips";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -52,14 +56,20 @@ const App = () => (
             <Route path="TripsList" element={<TripsList/> }/>
             <Route path="TripList/:id" element={<TripListDetails/>}/>
           </Route>
-
+ 
+          <Route path="/admin" element={<LayoutAdmin />}>
+             <Route path="dashboard" element={<AdminDashboard />}/>
+             <Route path="manageuser" element={<Manageuser />}/>
+             <Route path="verifyorganizers" element={<Verifyorganizers/>}/>
+             <Route path="Trips" element={<Trips />}/>
+          </Route>
                    <Route path="/verification" element={<Verification/>}/>
 
           {/* <Route path="/trip/:id" element={<TripDetails />} /> */}
           <Route path="/trip/:id/chat" element={<TripChat />} />
           {/* <Route path="/organizer" element={<OrganizerDashboard />} /> */}
-          <Route path="/admin/verifications" element={<AdminVerifications />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* <Route path="/admin/verifications" element={<AdminVerifications />} /> */}
+          {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

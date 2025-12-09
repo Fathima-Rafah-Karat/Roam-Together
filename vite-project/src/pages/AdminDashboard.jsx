@@ -462,12 +462,12 @@ const navigate = useNavigate();
     <div className="min-h-screen bg-gray-50">
 
 
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+      <div className="container mx-auto px-4  pb-12">
+        <h1 className="text-4xl text-blue-400 font-bold mb-2">Admin Dashboard</h1>
         <p className="text-muted-foreground mb-8">Manage users, trips, and verification requests</p>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8">
+        {/* <div className="flex gap-4 mb-8">
           <Button variant={activeView === "stats" ? "default" : "outline"} onClick={() => setActiveView("stats")} className="gap-2">
             <LayoutDashboard className="h-4 w-4" /> Dashboard
           </Button>
@@ -484,7 +484,7 @@ const navigate = useNavigate();
           <Button variant={activeView === "trips" ? "default" : "outline"} onClick={() => setActiveView("trips")} className="gap-2">
             <Calendar className="h-4 w-4" /> Trips
           </Button>
-        </div>
+        </div> */}
 
         {/* Manage Users View */}
         {activeView === "users" && (
