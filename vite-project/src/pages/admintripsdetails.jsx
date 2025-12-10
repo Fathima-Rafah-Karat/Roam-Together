@@ -238,7 +238,7 @@ export default function AdminTripsDetails() {
                         <div className="relative">
                             <div
                                 ref={sliderRef}
-                                className="h-96 overflow-x-auto flex gap-2 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-400"
+                                className="h-[500px] overflow-x-auto flex gap-2 scroll-smooth snap-x snap-mandatory scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-gray-400"
                             >
                                 {trip.tripPhoto?.length > 0 ? (
                                     trip.tripPhoto.map((photo, index) => (
@@ -246,18 +246,17 @@ export default function AdminTripsDetails() {
                                             key={index}
                                             src={`http://localhost:5000/${photo.replace(/^\\+/, "")}`}
                                             alt={`${trip.title} ${index + 1}`}
-                                            className="h-96 w-full flex-shrink-0 object-cover rounded-lg snap-center"
+                                            className="h-[500px] w-full flex-shrink-0 object-cover rounded-lg snap-center"
                                         />
                                     ))
                                 ) : (
                                     <img
                                         src="/fallback.jpg"
                                         alt="Fallback"
-                                        className="h-96 w-full object-cover rounded-lg"
+                                        className="h-[500px] w-full object-cover rounded-lg"
                                     />
                                 )}
                             </div>
-
                         </div>
 
                         {/* ---- Thumbnails (Only 3 + More) ---- */}
