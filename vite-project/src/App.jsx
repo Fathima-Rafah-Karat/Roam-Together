@@ -28,6 +28,7 @@ import { LayoutAdmin } from "./components/LayoutAdmin";
 import Manageuser from "./pages/manageuser";
 import Verifyorganizers from "./pages/Verifyorganizers";
 import Trips from "./pages/Trips";
+import AdminTripsDetails from "./pages/admintripsdetails";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -62,6 +63,7 @@ const App = () => (
              <Route path="manageuser" element={<Manageuser />}/>
              <Route path="verifyorganizers" element={<Verifyorganizers/>}/>
              <Route path="Trips" element={<Trips />}/>
+             <Route path="Trips/:id" element={<AdminTripsDetails />}/>
           </Route>
                    <Route path="/verification" element={<Verification/>}/>
 

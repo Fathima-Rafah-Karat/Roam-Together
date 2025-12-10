@@ -54,7 +54,7 @@ export function AdminSidebar() {
               onClick={() => {
                 localStorage.clear();
                 toast.dismiss(t.id);
-                navigate("/admin/login");
+                navigate("/");
               }}
             >
               Logout

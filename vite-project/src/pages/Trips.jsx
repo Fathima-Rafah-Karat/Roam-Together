@@ -1,138 +1,126 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, Users, Clock } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const trips = [
-  {
-    id: 1,
-    title: "Beach Trip",
-    location: "Goa",
-    date: "2025-12-05",
-    status: "upcoming",
-    image: "/tropical-beach-paradise.png",
-    price: "$299",
-    duration: "3 days",
-    participants: "12 people",
-    description: "Experience the pristine beaches and water sports activities",
-    tags: ["Beach", "Water Sports"],
-  },
-  {
-    id: 2,
-    title: "Mountain Hike",
-    location: "Himalayas",
-    date: "2025-12-10",
-    status: "upcoming",
-    image: "/majestic-mountain-landscape.jpg",
-    price: "$399",
-    duration: "5 days",
-    participants: "8 people",
-    description: "Trek through stunning mountain peaks and scenic valleys",
-    tags: ["Adventure", "Hiking"],
-  },
-  {
-    id: 3,
-    title: "City Tour",
-    location: "Mumbai",
-    date: "2025-11-10",
-    status: "completed",
-    image: "/urban-city-skyline.jpg",
-    price: "$199",
-    duration: "2 days",
-    participants: "15 people",
-    description: "Explore the vibrant culture and landmarks of the city",
-    tags: ["City", "Culture"],
-  },
-]
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { MapPin, Users, Calendar } from "lucide-react";
+import { motion } from "framer-motion";
 
-export default function Trips({ onSelectTrip }) {
+export default function Trips() {
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/traveler/trips");
+        const tripsData = res.data.data || [];
+        setTrips(tripsData);
+      } catch (err) {
+        console.error("Failed to load trips", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, []);
+
+  if (loading) {
+    return (
+      <p className="text-center py-10 text-gray-400 text-xl">Loading trips...</p>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4  pb-12">
-        <h1 className="text-4xl text-blue-400 font-bold mb-2">Trips </h1>
-        <p className="text-muted-foreground mb-8">Manage and view your data </p>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {trips.map((trip) => (
-        <div
-          key={trip.id}
-          className="relative h-80 rounded-lg overflow-hidden cursor-pointer group"
-          onClick={() => console.log(`Navigate to trip ${trip.id}`)}
-        >
-          {/* Background image */}
-          <img
-            src={trip.image || "/placeholder.svg"}
-            alt={trip.title}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+    <div className="container mx-auto px-4 pb-12">
+      <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent mb-2">
+        Trips
+      </h1>
+      <p className="text-muted-foreground mb-8">Explore all available trips</p>
 
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {trips.map((trip, index) => {
+          const imageUrl =
+            trip.tripPhoto?.[0]
+              ? `http://localhost:5000/${trip.tripPhoto[0].replace(/^\/+/, "")}`
+              : "/placeholder.svg";
 
-          {/* Content */}
-          <div className="absolute inset-0 flex flex-col justify-between p-4">
-            {/* Tags at top */}
-            <div className="flex flex-wrap gap-2">
-              {trip.tags.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="bg-white/20 text-white hover:bg-white/30"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Content at bottom */}
-            <div className="space-y-3">
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1">{trip.title}</h3>
-                <div className="flex items-center gap-1 text-sm text-gray-200">
-                  <MapPin className="w-4 h-4" />
-                  <span>{trip.location}</span>
-                </div>
-              </div>
-
-              <div className="text-2xl font-bold text-white">{trip.price}</div>
-
-              <p className="text-sm text-gray-100 line-clamp-2">{trip.description}</p>
-
-              {/* Trip details */}
-              <div className="flex gap-4 text-xs text-gray-200">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span>{trip.duration}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  <span>{trip.participants}</span>
-                </div>
-              </div>
-
-              <Button
-                className="w-full bg-primary hover:bg-primary/90 text-white"
-                size="sm"
-                onClick={() => onSelectTrip && onSelectTrip(trip)}
-              >
-                View Details
-              </Button>
-            </div>
-          </div>
-
-          {/* Status badge overlay */}
-          <div className="absolute top-4 right-4">
-            <Badge
-              variant={trip.status === "completed" ? "secondary" : "default"}
-              className={
-                trip.status === "completed"
-                  ? "bg-gray-500/80 text-white"
-                  : "bg-green-500/80 text-white"
-              }
+          return (
+            <motion.div
+              key={trip._id}
+              className="relative rounded-xl overflow-hidden h-96 cursor-pointer shadow-lg hover:shadow-xl transition duration-300"
+              // ✅ FIXED → correct admin route
+              onClick={() => navigate(`/admin/Trips/${trip._id}`)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+              whileHover={{ scale: 1.02 }}
             >
-              {trip.status === "completed" ? "Completed" : "Upcoming"}
-            </Badge>
-          </div>
-        </div>
-      ))}
+              <img
+                src={imageUrl}
+                alt={trip.title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
+
+              <div className="relative z-20 h-full flex flex-col justify-end p-5 text-white">
+                {trip.tags?.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mb-2">
+                    {trip.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="bg-white/20 text-white border-white/30 backdrop-blur-md text-xs"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                <h3 className="text-2xl font-bold mb-3">{trip.title}</h3>
+
+                <div className="flex items-center mb-3">
+                  <div className="flex items-center gap-2 bg-white text-black px-2 py-1 rounded-md">
+                    <MapPin className="w-4 h-4 text-blue-500" />
+                    {trip.location}
+                  </div>
+                </div>
+
+                <div className="flex justify-between text-sm text-gray-200 mb-3">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(trip.startDate).toLocaleDateString("en-GB")} -{" "}
+                    {new Date(trip.endDate).toLocaleDateString("en-GB")}
+                  </span>
+
+                  <span className="flex items-center gap-1">
+                    <Users className="w-4 h-4" /> {trip.participants}
+                  </span>
+                </div>
+
+                <Button
+                  className="w-full mt-3 bg-primary hover:bg-primary/90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    // ✅ FIXED → correct admin route
+                    navigate(`/admin/Trips/${trip._id}`);
+                  }}
+                >
+                  View Details
+                </Button>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
-    </div>
-  )
+  );
 }
+
