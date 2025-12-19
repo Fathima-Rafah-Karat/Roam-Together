@@ -1,124 +1,150 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Card,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, MapPin, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Calendar, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import beachImage from "@/assets/trip-beach.jpg";
-import cityImage from "@/assets/trip-city.jpg";
-import mountainImage from "@/assets/trip-mountain.jpg";
-
-const trips = [
-  {
-    id: 1,
-    title: "Tropical Paradise Escape",
-    location: "Maldives",
-    image: beachImage,
-    dates: "Jun 15-22, 2025",
-    participants: 8,
-    maxParticipants: 12,
-    organizer: "Sarah Chen",
-    rating: 4.9,
-    verified: true,
-  },
-  {
-    id: 2,
-    title: "European Cultural Journey",
-    location: "Italy & Spain",
-    image: cityImage,
-    dates: "Jul 10-24, 2025",
-    participants: 6,
-    maxParticipants: 10,
-    organizer: "Marco Rossi",
-    rating: 5.0,
-    verified: true,
-  },
-  {
-    id: 3,
-    title: "Mountain Adventure Trek",
-    location: "Nepal",
-    image: mountainImage,
-    dates: "Sep 5-18, 2025",
-    participants: 5,
-    maxParticipants: 8,
-    organizer: "Tenzing Sherpa",
-    rating: 4.8,
-    verified: true,
-  },
-];
 
 const FeaturedTrips = () => {
   const navigate = useNavigate();
-  
+
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/traveler/trips"
+        );
+        setTrips(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch trips", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrips();
+  }, []);
+
+  if (loading) return null;
+
+  const displayedTrips = showAll ? trips : trips.slice(0, 3);
+
   return (
     <section id="discover" className="py-20 bg-muted/30">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* Header */}
+        <div className="text-center">
           <h2 className="text-4xl font-bold mb-4">Featured Trips</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover handpicked adventures curated by verified organizers
           </p>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {trips.map((trip) => (
-            <Card key={trip.id} className="overflow-hidden hover:shadow-[var(--shadow-large)] transition-all duration-300 hover:scale-[1.02]">
-              <div className="relative h-56 overflow-hidden">
-                <img 
-                  src={trip.image} 
+
+        {/* Trips Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {displayedTrips.map((trip) => {
+            const imageUrl =
+              trip.tripPhoto?.length > 0
+                ? `http://localhost:5000/${trip.tripPhoto[0].replace(/^\/+/, "")}`
+                : "/fallback.jpg";
+
+            return (
+              <Card
+                key={trip._id}
+                className="relative overflow-hidden h-96 cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => navigate(`/dash/trip/${trip._id}`)}
+              >
+                {/* Background Image */}
+                <img
+                  src={imageUrl}
                   alt={trip.title}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute top-4 right-4">
-                  <Badge className="bg-card/90 backdrop-blur-sm border-0">
-                    <Star className="h-3 w-3 fill-accent text-accent mr-1" />
-                    {trip.rating}
-                  </Badge>
-                </div>
-              </div>
-              
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">{trip.location}</span>
-                </div>
-                
-                <h3 className="text-xl font-semibold mb-3">{trip.title}</h3>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>{trip.dates}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Users className="h-4 w-4" />
-                    <span>{trip.participants}/{trip.maxParticipants} travelers joined</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between pt-4 border-t border-border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary" />
-                    <div className="text-sm">
-                      <div className="font-medium">{trip.organizer}</div>
-                      {trip.verified && (
-                        <div className="text-xs text-muted-foreground">Verified Organizer</div>
-                      )}
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/25 to-black/10" />
+
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col justify-end p-6 text-white">
+                  {/* Tags */}
+                  {trip.tags?.length > 0 && (
+                    <div className="flex gap-2 flex-wrap mb-2">
+                      {trip.tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs"
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
                     </div>
+                  )}
+
+                  {/* Title */}
+                  <CardTitle className="text-3xl font-bold mb-3">
+                    {trip.title}
+                  </CardTitle>
+
+                  {/* Location */}
+                  <CardDescription className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center rounded-lg px-2 gap-2 bg-white text-black">
+                      <MapPin className="h-4 w-4 text-blue-500" />
+                      {trip.location}
+                    </div>
+                  </CardDescription>
+
+                  {/* Meta */}
+                  <div className="flex gap-8 text-sm text-white pt-2">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-5 w-5" />
+                      {new Date(trip.startDate).toLocaleDateString("en-GB")} -{" "}
+                      {new Date(trip.endDate).toLocaleDateString("en-GB")}
+                    </span>
+
+                    <span className="flex items-center gap-1">
+                      <Users className="h-5 w-5" />
+                      {trip.participants}/{trip.maxParticipants}
+                    </span>
                   </div>
-                  <Button size="sm" variant="default" >
-                    Join Trip
+
+                  {/* Button */}
+                  <Button
+                    className="w-full mt-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // navigate(`/dash/trip/${trip._id}`);
+                    }}
+                  >
+                    View Details
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
-        
-        <div className="text-center mt-12">
-          <Button size="lg" variant="outline" onClick={() => navigate("/auth")}>
-            View All Trips
-          </Button>
-        </div>
+
+        {/* View All Trips */}
+        {!showAll && trips.length > 3 && (
+          <div className="text-center">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setShowAll(true)}
+            >
+              View All Trips
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );
