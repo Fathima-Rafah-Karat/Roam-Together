@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Quote } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const gradientClasses = [
   "bg-gradient-to-br from-primary to-secondary",
@@ -19,6 +20,7 @@ const getSafeRating = (rating) => {
 const Testimonials = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false); // only expand once
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -41,6 +43,9 @@ const Testimonials = () => {
 
   if (loading) return null;
 
+  // ⭐ Show first 6, then all after clicking Show More
+  const visibleReviews = showAll ? reviews : reviews.slice(0, 6);
+
   return (
     <section id="stories" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,12 +59,14 @@ const Testimonials = () => {
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review, index) => {
+          {visibleReviews.map((review, index) => {
             const rating = getSafeRating(review.rating);
 
-            // 👤 Profile image (fallback safe)
             const profileImage = review.TravelerId?.photo
-              ? `http://localhost:5000/${review.TravelerId.photo.replace(/^\/+/, "")}`
+              ? `http://localhost:5000/${review.TravelerId.photo.replace(
+                  /^\/+/,
+                  ""
+                )}`
               : null;
 
             return (
@@ -88,7 +95,6 @@ const Testimonials = () => {
 
                   {/* User Info */}
                   <div className="flex items-center gap-3 pt-4 border-t border-border">
-                    {/* Avatar */}
                     {profileImage ? (
                       <img
                         src={profileImage}
@@ -117,6 +123,18 @@ const Testimonials = () => {
             );
           })}
         </div>
+
+        {/* ⭐ Show More Button (NO Show Less) */}
+        {!showAll && reviews.length > 6 && (
+          <div className="flex justify-center mt-12">
+            <Button
+              variant="outline"
+              onClick={() => setShowAll(true)}
+            >
+              Show More Reviews
+            </Button>
+          </div>
+        )}
 
         {/* Empty State */}
         {!loading && reviews.length === 0 && (

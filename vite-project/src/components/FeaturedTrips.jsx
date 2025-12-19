@@ -36,7 +36,7 @@ const FeaturedTrips = () => {
 
   if (loading) return null;
 
-  const displayedTrips = showAll ? trips : trips.slice(0, 3);
+  const displayedTrips = showAll ? trips : trips.slice(0, 6);
 
   return (
     <section id="discover" className="py-20 bg-muted/30">
