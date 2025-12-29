@@ -142,6 +142,17 @@ const getUserIdFromToken = (token) => {
   }
 };
 
+// Format date to hh:mm AM/PM
+const formatTime = (dateString) => {
+  const date = new Date(dateString);
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  const mins = minutes < 10 ? "0" + minutes : minutes;
+  return `${hours}:${mins} ${ampm}`;
+};
+
 const TripChat = () => {
   const { id: tripId } = useParams();
   const navigate = useNavigate();
@@ -217,7 +228,6 @@ const TripChat = () => {
     socket.emit("joinRoom", tripId);
 
     socket.on("receiveMessage", (msg) => {
-      // Only add message if it's NOT from current user
       if (String(msg.senderId) === String(myUserId)) return;
 
       setMessages((prev) => {
@@ -254,9 +264,6 @@ const TripChat = () => {
   const sendMessage = () => {
     if (!message.trim() || !myUserId) return;
 
-    const senderName =
-      participants.find((p) => p.authId === myUserId)?.name || "You";
-
     const msgPayload = {
       _id: Date.now().toString(),
       tripId,
@@ -268,13 +275,12 @@ const TripChat = () => {
 
     socket.emit("sendMessage", msgPayload);
     setMessage("");
-
-    // Optimistic UI
     setMessages((prev) => [...prev, msgPayload]);
   };
 
   return (
     <div className="w-full h-screen flex flex-col bg-[#e5ddd5]">
+      {/* HEADER */}
       <div className="bg-[#075e54] text-white p-4 flex items-center">
         <button onClick={() => navigate(-1)} className="mr-3">
           <ArrowLeft size={24} />
@@ -289,6 +295,7 @@ const TripChat = () => {
         <span className="font-bold">{tripName}</span>
       </div>
 
+      {/* MESSAGES */}
       <div className="flex-1 p-4 overflow-y-auto space-y-2">
         {messages.map((msg) => {
           const isOwn = String(msg.senderId) === String(myUserId);
@@ -309,6 +316,9 @@ const TripChat = () => {
                   {msg.senderName}
                 </div>
                 <div>{msg.text}</div>
+                <div className="text-[10px] text-gray-500 mt-1 text-right">
+                  {formatTime(msg.createdAt)}
+                </div>
               </div>
             </div>
           );
@@ -316,6 +326,7 @@ const TripChat = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* INPUT */}
       <div className="flex items-center p-3 bg-gray-100">
         <input
           value={message}
@@ -336,6 +347,7 @@ const TripChat = () => {
 };
 
 export default TripChat;
+
 
 
 
