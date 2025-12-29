@@ -153,10 +153,10 @@ useEffect(() => {
 
             console.log("API Response:", res.data);
 
-            // ✅ STEP 1: Always read from res.data.data
+            //  STEP 1: Always read from res.data.data
             const reviews = res.data?.data || [];
 
-            // ✅ STEP 2: Filter review for THIS trip
+            //  STEP 2: Filter review for THIS trip
             const review = reviews.find(
                 (r) => String(r.tripId) === String(trip._id)
             );
@@ -166,7 +166,7 @@ useEffect(() => {
                 return;
             }
 
-            // ✅ STEP 3: Set state & open dialog
+            // STEP 3: Set state & open dialog
             setTripReview(review);
             setReviewOpen(true);
 
