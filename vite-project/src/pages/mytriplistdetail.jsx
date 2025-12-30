@@ -28,6 +28,7 @@ import toast from "react-hot-toast";
 export default function TripListDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+console.log("organizer trip detail");
 
     const [trip, setTrip] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -120,27 +121,27 @@ useEffect(() => {
 
 
 
-    const fetchEmergencyContacts = async (travelerId) => {
-        try {
-            const token = localStorage.getItem("token"); // or "organizerToken"
+    // const fetchEmergencyContacts = async (travelerId) => {
+    //     try {
+    //         const token = localStorage.getItem("token"); // or "organizerToken"
 
-            const res = await axios.get(
-                `http://localhost:5000/api/organizer/viewemergency?travelerId=${travelerId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+    //         const res = await axios.get(
+    //             `http://localhost:5000/api/organizer/viewemergency?travelerId=${travelerId}`,
+    //             {
+    //                 headers: {
+    //                     Authorization: `Bearer ${token}`,
+    //                 },
+    //             }
+    //         );
 
-            setEmergencyContacts((prev) => ({
-                ...prev,
-                [travelerId]: res.data.contacts || [],
-            }));
-        } catch (err) {
-            console.error("Emergency contact fetch error", err);
-        }
-    };
+    //         setEmergencyContacts((prev) => ({
+    //             ...prev,
+    //             [travelerId]: res.data.contacts || [],
+    //         }));
+    //     } catch (err) {
+    //         console.error("Emergency contact fetch error", err);
+    //     }
+    // };
 
 
 
@@ -1031,8 +1032,8 @@ const handleSendNotification = async () => {
                                                         ))}
                                                     </div>
                                                 </div>
-                                                {/* PHOTOS */}
-                                                <div>
+                                                {/* PHOTO */}
+                                              <div>
                                                     <Label className="font-semibold text-lg">Trip Photos</Label>
                                                     <div className="flex gap-3 flex-wrap mt-2">
                                                         {editData.tripPhoto.map((photo, idx) => {
@@ -1311,9 +1312,18 @@ const handleSendNotification = async () => {
                                                 {/* LEFT SIDE — Traveler + Review */}
                                                 <div className="flex gap-3">
                                                     {/* Avatar */}
-                                                    <div className="h-11 w-11 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                                                        {(tripReview.TravelerId?.name || "A")[0].toUpperCase()}
-                                                    </div>
+                                                    <div className="h-11 w-11 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center font-bold">
+  {tripReview.TravelerId?.photo ? (
+    <img
+      src={`http://localhost:5000/${tripReview.TravelerId.photo.replace(/^\\+/, "")}`}
+      alt={tripReview.TravelerId.name || "Traveler"}
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    (tripReview.TravelerId?.name || "A")[0].toUpperCase()
+  )}
+</div>
+
 
                                                     <div>
                                                         <p className="font-semibold text-sm">

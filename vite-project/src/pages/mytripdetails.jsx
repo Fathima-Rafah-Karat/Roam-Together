@@ -57,7 +57,7 @@ export default function TripDetails() {
 
   const [participantCount, setParticipantCount] = useState(0);
 
-
+console.log("hi");
   useEffect(() => {
     const fetchCount = async () => {
       try {
@@ -583,7 +583,7 @@ const handleDeleteTrip = async () => {
               {trip.inclusionspoint &&
                 trip.inclusionspoint
                   .join(",") // ensure it's a single string
-                  .split(",") // split into separate points
+                  .split("") // split into separate points
                   .map((item, index) => (
                     <li key={index} className="capitalize">
                       {item.trim()}
@@ -592,13 +592,14 @@ const handleDeleteTrip = async () => {
             </ul>
           </td>
 
+
           {/* EXCLUSIONS */}
           <td className="p-3 align-top">
             <ul className="list-disc ml-5">
               {trip.exclusionspoint &&
                 trip.exclusionspoint
                   .join(",")
-                  .split(",")
+                  .split("")
                   .map((item, index) => (
                     <li key={index} className="capitalize">
                       {item.trim()}
