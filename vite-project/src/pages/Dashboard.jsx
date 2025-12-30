@@ -427,7 +427,7 @@ export default function DiscoverTrips() {
                   </span>
                 </div>
 
-                {!isPastTrip && (
+                {/* {!isPastTrip && (
                   <Button
                     className="w-full mt-3"
                     onClick={(e) => {
@@ -437,7 +437,18 @@ export default function DiscoverTrips() {
                   >
                     View Details
                   </Button>
-                )}
+                )} */}
+                {!isPastTrip && !isRegistered && (
+  <Button
+    className="w-full mt-3"
+    onClick={(e) => {
+      e.stopPropagation();
+      navigate(`/dash/trip/${trip._id}`);
+    }}
+  >
+    View Details
+  </Button>
+)}
               </div>
             </Card>
           );
