@@ -260,6 +260,7 @@
 
 
 // src/pages/TravelDiary.jsx
+// src/pages/TravelDiary.jsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -306,15 +307,13 @@ export default function TravelDiary() {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-
         const res = await axios.get(
           "http://localhost:5000/api/traveler/diary/diaries",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        const data = res.data.data ?? res.data.diaries ?? [];
-        setEntries(data.map((e) => ({ ...e })));
-      } catch (err) {
+        setEntries(res.data.data ?? res.data.diaries ?? []);
+      } catch {
         toast.error("Failed to load diary entries");
       } finally {
         setLoading(false);
@@ -363,14 +362,12 @@ export default function TravelDiary() {
 
         if (updated) {
           setEntries((prev) =>
-            prev.map((e) => {
-              const eid = e._id || e.id;
-              const uid = updated._id || updated.id;
-              return eid === uid ? { ...updated } : { ...e };
-            })
+            prev.map((e) =>
+              (e._id || e.id) === (updated._id || updated.id)
+                ? updated
+                : e
+            )
           );
-
-          setSelectedEntry({ ...updated });
         }
 
         toast.success("Diary updated successfully");
@@ -387,16 +384,17 @@ export default function TravelDiary() {
         const created = res.data.data;
 
         if (created) {
-          setEntries((prev) => [{ ...created }, ...prev.map((e) => ({ ...e }))]);
-          setSelectedEntry({ ...created });
+          setEntries((prev) => [created, ...prev]);
         }
 
         toast.success("Diary created successfully");
       }
 
+      // reset UI to list
       setForm({ id: null, title: "", date: "", yourstory: "" });
       setDialogOpen(false);
-    } catch (err) {
+      setSelectedEntry(null);
+    } catch {
       toast.error("Failed to save diary");
     }
   };
@@ -427,7 +425,7 @@ export default function TravelDiary() {
       );
 
       setEntries((prev) =>
-        prev.filter((e) => (e._id || e.id) !== id).map((e) => ({ ...e }))
+        prev.filter((e) => (e._id || e.id) !== id)
       );
       setSelectedEntry(null);
 
@@ -448,7 +446,9 @@ export default function TravelDiary() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold">Travel Diary</h1>
-            <p className="text-muted-foreground">Your personal travel journal</p>
+            <p className="text-muted-foreground">
+              Your personal travel journal
+            </p>
           </div>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -471,8 +471,7 @@ export default function TravelDiary() {
               <div className="grid gap-4 py-4">
                 <div>
                   <Label>Title</Label>
-                  <Input id="title" value={form.title} onChange={handleChange}
-                  placeholder="Give your entry a title" />
+                  <Input id="title" value={form.title} onChange={handleChange} />
                 </div>
 
                 <div>
@@ -491,7 +490,6 @@ export default function TravelDiary() {
                     id="yourstory"
                     value={form.yourstory}
                     onChange={handleChange}
-                    placeholder="write about your experiences.."
                     className="min-h-[150px]"
                   />
                 </div>
@@ -509,7 +507,7 @@ export default function TravelDiary() {
         {selectedEntry ? (
           <Card className="p-6">
             <Button variant="ghost" onClick={() => setSelectedEntry(null)}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> 
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
             </Button>
 
             <h2 className="text-2xl font-bold mt-2">
